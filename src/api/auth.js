@@ -1,21 +1,21 @@
 import defaultUser from "../utils/default-user";
-import { firebase, api } from "../firebase";
+import { firebase, auth } from "../firebase";
 
 export async function signIn(email, password) {
-  try {
-    // Send request
-    console.log(email, password);
-
-    return {
-      isOk: true,
-      data: defaultUser,
-    };
-  } catch {
-    return {
-      isOk: false,
-      message: "Authentication failed",
-    };
-  }
+  let result = {};
+  await auth
+    .doSignInWithEmailAndPassword(email, password)
+    .then((res) => {
+      console.log(res);
+      result = { isOk: true, data: res.user };
+    })
+    .catch((err) => {
+      result = {
+        isOk: false,
+        message: err.message,
+      };
+    });
+  return result;
 }
 
 export async function getUser() {
@@ -34,19 +34,18 @@ export async function getUser() {
 }
 
 export async function createAccount(email, password) {
-  try {
-    // Send request
-    console.log(email, password);
+  let result = {};
 
-    return {
-      isOk: true,
-    };
-  } catch {
-    return {
-      isOk: false,
-      message: "Failed to create account",
-    };
-  }
+  await auth
+    .doCreateUserWithEmailAndPassword(email, password)
+    .then((res) => {
+      result = { isOk: true };
+      console.log(res);
+    })
+    .catch((err) => {
+      result = { isOk: false, message: err.message };
+    });
+  return result;
 }
 
 export async function changePassword(email, recoveryCode) {
