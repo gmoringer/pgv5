@@ -11,7 +11,6 @@ export const deleteOneProperty = (key) =>
 
 export const addNewProperty = async (property, user) => {
   const lastNr = await getLastProperty();
-  // console.log(lastNr.docs[0].data());
   const propNr =
     lastNr.docs.length === 0
       ? parseInt(process.env.REACT_APP_FIRST_PROP_NR)
