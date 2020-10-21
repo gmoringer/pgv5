@@ -57,16 +57,11 @@ const PropertyListPage = (props) => {
         await db.deleteOneJob(key).then(store.load());
       },
       insert: async (values) => {
-        // console.log(values);
         await db.addNewJob(values, user);
         store.load();
       },
       update: (key, value) => {
-        props.firebase.db
-          .collection("properties")
-          .doc(key)
-          .update({ ...value })
-          .then(() => store.load());
+        db.updateOneJob(key, value).then((res) => store.load());
       },
     });
   }, []);

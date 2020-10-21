@@ -5,12 +5,9 @@ import { AuthProvider, useAuth } from "../contexts/auth";
 // Property API
 
 export const getAllProperties = () => db.collection("properties").get();
-export const getAllJobs = () => db.collection("jobs").get();
 
 export const deleteOneProperty = (key) =>
   db.collection("properties").doc(key).delete();
-
-export const deleteOneJob = (key) => db.collection("jobs").doc(key).delete();
 
 export const addNewProperty = async (property, user) => {
   const lastNr = await getLastProperty();
@@ -25,7 +22,13 @@ export const addNewProperty = async (property, user) => {
     propertynr: propNr,
   });
 };
+export const getLastProperty = () =>
+  db.collection("properties").orderBy("propertynr", "desc").limit(1).get();
 
+// JOB API
+
+export const getAllJobs = () => db.collection("jobs").get();
+export const deleteOneJob = (key) => db.collection("jobs").doc(key).delete();
 export const addNewJob = async (job, user) => {
   const lastNr = await getLastJob();
   console.log(job);
@@ -39,13 +42,13 @@ export const addNewJob = async (job, user) => {
     jobnr: jobNr,
     am: user.uid,
   });
-  //   date: Firebase.firestore.Timestamp.now(),
-  //   jobnr: lastNr,
-  // });
 };
 
-export const getLastProperty = () =>
-  db.collection("properties").orderBy("propertynr", "desc").limit(1).get();
+export const updateOneJob = async (key, value) =>
+  await db
+    .collection("jobs")
+    .doc(key)
+    .update({ ...value });
 
 export const getLastJob = () =>
   db.collection("jobs").orderBy("jobnr", "desc").limit(1).get();
