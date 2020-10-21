@@ -5,6 +5,11 @@ export const navigation = [
     icon: "home",
   },
   {
+    text: "Profile",
+    path: "/profile",
+    icon: "card",
+  },
+  {
     text: "PO Management",
     icon: "folder",
     items: [
@@ -13,9 +18,10 @@ export const navigation = [
         path: "/propertylist",
       },
       {
-        text: "Profile",
-        path: "/profile",
+        text: "Job List",
+        path: "/joblist",
       },
+
       {
         text: "Tasks",
         path: "/tasks",

@@ -3,8 +3,8 @@ import {
   HomePage,
   TasksPage,
   ProfilePage,
-  PropertList,
   PropertyListPage,
+  JobListPage,
 } from "./pages";
 
 const routes = [
@@ -23,6 +23,10 @@ const routes = [
   {
     path: "/propertylist",
     component: PropertyListPage,
+  },
+  {
+    path: "/joblist",
+    component: JobListPage,
   },
 ];
 

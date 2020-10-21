@@ -5,9 +5,12 @@ import { AuthProvider, useAuth } from "../contexts/auth";
 // Property API
 
 export const getAllProperties = () => db.collection("properties").get();
+export const getAllJobs = () => db.collection("jobs").get();
 
 export const deleteOneProperty = (key) =>
   db.collection("properties").doc(key).delete();
+
+export const deleteOneJob = (key) => db.collection("jobs").doc(key).delete();
 
 export const addNewProperty = async (property, user) => {
   const lastNr = await getLastProperty();
@@ -23,8 +26,29 @@ export const addNewProperty = async (property, user) => {
   });
 };
 
+export const addNewJob = async (job, user) => {
+  const lastNr = await getLastJob();
+  console.log(job);
+  const jobNr =
+    lastNr.docs.length === 0
+      ? parseInt(process.env.REACT_APP_FIRST_JOB_NR)
+      : lastNr.docs[0].data().jobnr + 1;
+  db.collection("jobs").add({
+    ...job,
+    date: Firebase.firestore.Timestamp.now(),
+    jobnr: jobNr,
+    am: user.uid,
+  });
+  //   date: Firebase.firestore.Timestamp.now(),
+  //   jobnr: lastNr,
+  // });
+};
+
 export const getLastProperty = () =>
   db.collection("properties").orderBy("propertynr", "desc").limit(1).get();
+
+export const getLastJob = () =>
+  db.collection("jobs").orderBy("jobnr", "desc").limit(1).get();
 
 // USER API
 

@@ -20,35 +20,45 @@ import { db } from "../../firebase";
 
 const PropertyListPage = (props) => {
   const [managers, setManagers] = useState([]);
+  const [properties, setProperties] = useState([]);
   const { user } = useAuth();
 
   useEffect(() => {
     db.getAllUsers().then((res) => {
       const result = [];
-      console.log(res);
       res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
       setManagers(result);
+    });
+  }, []);
+
+  useEffect(() => {
+    db.getAllProperties().then((res) => {
+      const result = [];
+      res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
+      setProperties(result);
       console.log(result);
     });
   }, []);
 
   const store = useMemo(() => {
     return new DataSource({
-      key: "id",
+      key: "uid",
       load: async () => {
         const result = [];
-        await db
-          .getAllProperties()
-          .then((snap) =>
-            snap.forEach((doc) => result.push({ ...doc.data(), id: doc.id }))
-          );
+        await db.getAllJobs().then((snap) =>
+          snap.forEach((doc) => {
+            result.push({ ...doc.data(), uid: doc.id });
+          })
+        );
+        console.log(result);
         return result;
       },
       remove: async (key) => {
-        await db.deleteOneProperty(key).then(store.load());
+        await db.deleteOneJob(key).then(store.load());
       },
       insert: async (values) => {
-        await db.addNewProperty(values, user);
+        // console.log(values);
+        await db.addNewJob(values, user);
         store.load();
       },
       update: (key, value) => {
@@ -67,9 +77,13 @@ const PropertyListPage = (props) => {
     };
   }, []);
 
+  const onEditing = (values) => {
+    console.log(values);
+  };
+
   return (
     <React.Fragment>
-      <h2 className={"content-block"}>Property List</h2>
+      <h2 className={"content-block"}>Job List</h2>
       <DataGrid
         className={"dx-card wide-card"}
         dataSource={store}
@@ -79,6 +93,7 @@ const PropertyListPage = (props) => {
         columnAutoWidth={true}
         columnHidingEnabled={true}
         allowColumnResizing={true}
+        onEditingStart={onEditing}
         rowAlternationEnabled={true}
       >
         <Paging defaultPageSize={10} />
@@ -91,7 +106,7 @@ const PropertyListPage = (props) => {
           allowUpdating={true}
         >
           <Popup
-            title="New Property Entry"
+            title="New Job Entry"
             showTitle={true}
             width={700}
             height={350}
@@ -99,61 +114,77 @@ const PropertyListPage = (props) => {
             <Position my="top" at="top" of={window} />
           </Popup>
           <Form>
-            <Item itemType="group" colCount={2} colSpan={2}>
-              <Item dataField="address" />
-              <Item dataField="city" />
-              <Item dataField="zip" />
-              <Item dataField="stateid" />
-              <Item dataField="gatecode" />
+            <Item itemType="group" colCount={1} colSpan={2}>
+              <Item dataField="property" />
+              <Item dataField="jobtitle" />
+              <Item dataField="price" />
             </Item>
           </Form>
         </Editing>
         <Column
-          dataField="propertynr"
-          caption="Property Nr."
+          dataField={"jobnr"}
+          hidingPriority={2}
+          caption="Job Nr."
           dataType="number"
-          alignment="left"
-          width={125}
           allowEditing={false}
         />
-        <Column dataField="am" caption="AM" alignment="center" width={100}>
+        <Column dataField={"property"} caption={"Property"} hidingPriority={5}>
           <Lookup
-            dataSource={managers}
-            displayExpr="initials"
-            valueExpr="uid"
-            disabled={true}
+            dataSource={properties}
+            valueExpr={"uid"}
+            displayExpr={"address"}
           />
-          {/* <RequiredRule /> */}
-        </Column>
-        <Column dataField="address" caption="Address">
-          <RequiredRule />
-        </Column>
-        <Column dataField="city" caption="City">
-          <RequiredRule />
-        </Column>
-        <Column dataField="zip" caption="Zip" alignment="center">
-          <RequiredRule />
         </Column>
         <Column
-          dataField="stateid"
-          caption="State"
-          allowFiltering={true}
+          dataField={"jobtitle"}
+          caption={"Job Description"}
           allowSorting={false}
+          hidingPriority={7}
+        />
+        <Column
+          dataField={"am"}
+          caption={"AM"}
+          hidingPriority={6}
+          allowEditing={false}
+          disabled={true}
         >
           <Lookup
-            dataSource={states}
-            valueExpr="ID"
-            displayExpr="Name"
-            disabled={true}
+            dataSource={managers}
+            valueExpr={"uid"}
+            displayExpr={"initials"}
           />
-          <RequiredRule />
         </Column>
         <Column
-          dataField="gatecode"
-          caption="Gate Code"
-          alignment="right"
-          allowFiltering={false}
-          allowSorting={false}
+          dataField={"price"}
+          caption={"Price"}
+          hidingPriority={3}
+          dataType="number"
+          format="currency"
+        />
+        <Column
+          dataField={"materialssum"}
+          caption={"Materials"}
+          dataType={"date"}
+          hidingPriority={4}
+          allowEditing={false}
+        />
+        <Column
+          dataField={"laborsum"}
+          caption={"Labor"}
+          hidingPriority={1}
+          allowEditing={false}
+        />
+        <Column
+          dataField={"profitsum"}
+          caption={"Profit"}
+          hidingPriority={0}
+          allowEditing={false}
+        />
+        <Column
+          dataField={"margin"}
+          caption={"Margin"}
+          hidingPriority={0}
+          allowEditing={false}
         />
       </DataGrid>
     </React.Fragment>
