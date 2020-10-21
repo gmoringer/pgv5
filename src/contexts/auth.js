@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { signIn as sendSignInRequest } from "../api/auth";
-import { firebase } from "../firebase";
+import { firebase, auth } from "../firebase";
 
 function AuthProvider(props) {
   const [user, setUser] = useState();
@@ -19,14 +19,6 @@ function AuthProvider(props) {
       }
       setLoading(false);
     });
-    // (async function () {
-    //   const result = await getUser();
-    //   if (result.isOk) {
-    //     setUser(result.data);
-    //   }
-
-    //   setLoading(false);
-    // })();
   }, []);
 
   const signIn = useCallback(async (email, password) => {
@@ -40,6 +32,7 @@ function AuthProvider(props) {
 
   const signOut = useCallback(() => {
     setUser();
+    auth.doSignOut();
   }, []);
 
   return (

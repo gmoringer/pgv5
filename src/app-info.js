@@ -1,3 +1,3 @@
 export default {
-  title: 'Pgv5'
+  title: "Pacific Gardens & Co",
 };

@@ -49,17 +49,15 @@ export async function changePassword(email, recoveryCode) {
 }
 
 export async function resetPassword(email) {
-  try {
-    // Send request
-    console.log(email);
-
-    return {
-      isOk: true,
-    };
-  } catch {
-    return {
-      isOk: false,
-      message: "Failed to reset password",
-    };
-  }
+  let result = {};
+  await auth
+    .doPasswordReset(email)
+    .then((res) => {
+      console.log(res);
+      result = { isOk: true };
+    })
+    .catch((err) => {
+      result = { isOk: false, message: err.message };
+    });
+  return result;
 }
