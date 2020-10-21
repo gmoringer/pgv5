@@ -1,12 +1,14 @@
 import { auth } from "../firebase";
+import { doCreateUser, getOneUser } from "../firebase/db";
 
 export async function signIn(email, password) {
   let result = {};
   await auth
     .doSignInWithEmailAndPassword(email, password)
-    .then((res) => {
-      console.log(res);
-      result = { isOk: true, data: res.user };
+    .then(async (res) => {
+      const snap = await getOneUser(res.user.uid);
+      const data = { ...snap.data(), uid: res.user.uid };
+      result = { isOk: true, data: data };
     })
     .catch((err) => {
       result = {
@@ -17,14 +19,16 @@ export async function signIn(email, password) {
   return result;
 }
 
-export async function createAccount(email, password) {
+export async function createAccount(value) {
+  const { email, password, initials, fullname } = value;
   let result = {};
 
   await auth
     .doCreateUserWithEmailAndPassword(email, password)
-    .then((res) => {
+    .then(async (res) => {
+      const { uid } = res.user;
+      await doCreateUser(uid, initials, fullname, email);
       result = { isOk: true };
-      console.log(res);
     })
     .catch((err) => {
       result = { isOk: false, message: err.message };

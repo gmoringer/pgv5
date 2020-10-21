@@ -1,6 +1,6 @@
 {
   "items": [],
-  "baseTheme": "material.blue.dark",
+  "baseTheme": "material.blue.dark.compact",
   "assetsBasePath": "../../../node_modules/devextreme/dist/css/",
   "outputColorScheme": "additional",
   "makeSwatch": true,

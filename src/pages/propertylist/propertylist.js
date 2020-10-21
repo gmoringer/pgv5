@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, compose } from "react";
 import { AuthProvider, useAuth } from "../../contexts/auth";
 import { states } from "../../constants";
-// import { getManagers } from "../../api/getData";
 import DataSource from "devextreme/data/data_source";
+import { Item } from "devextreme-react/form";
 import DataGrid, {
   Column,
   Pager,
@@ -13,33 +13,40 @@ import DataGrid, {
   RequiredRule,
   Popup,
   Position,
+  Form,
 } from "devextreme-react/data-grid";
 
 import { db } from "../../firebase";
 
-// import { withFirebase } from "../../Firebase";
-// import firebase from "firebase";
-
 const PropertyListPage = (props) => {
   const [managers, setManagers] = useState([]);
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    // getManagers(props.firebase.db).then((result) => setManagers(result));
+    db.getAllUsers().then((res) => {
+      const result = [];
+      console.log(res);
+      res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
+      setManagers(result);
+      console.log(result);
+    });
   }, []);
 
   const onRowInit = (value) => {
-    value.promise = props.firebase.db
-      .collection("properties")
-      .orderBy("propertynr", "desc")
-      .limit(1)
-      .get()
-      .then((snap) => {
-        value.data.propertynr =
-          snap.docs.length === 0
-            ? parseInt(process.env.REACT_APP_FIRST_PROP_NR)
-            : snap.docs[0].data().propertynr + 1;
-      });
+    // value.promise = props.firebase.db
+    //   .collection("properties")
+    //   .orderBy("propertynr", "desc")
+    //   .limit(1)
+    //   .get()
+    //   .then((snap) => {
+    //     value.data.propertynr =
+    //       snap.docs.length === 0
+    //         ? parseInt(process.env.REACT_APP_FIRST_PROP_NR)
+    //         : snap.docs[0].data().propertynr + 1;
+    //   });
   };
+
+  // console.log(user);
 
   const store = useMemo(() => {
     return new DataSource({
@@ -53,25 +60,12 @@ const PropertyListPage = (props) => {
           );
         return result;
       },
-      remove: (key) => {
-        props.firebase.db
-          .collection("properties")
-          .doc(key)
-          .delete()
-          .then(() => {
-            store.load();
-          });
+      remove: async (key) => {
+        await db.deleteOneProperty(key).then(store.load());
       },
-      insert: (values) => {
-        // props.firebase.db
-        //   .collection("properties")
-        //   .add({
-        //     ...values,
-        //     date: firebase.firestore.Timestamp.now(),
-        //   })
-        //   .then((data) => {
-        //     store.load();
-        //   });
+      insert: async (values) => {
+        await db.addNewProperty(values, user);
+        store.load();
       },
       update: (key, value) => {
         props.firebase.db
@@ -88,12 +82,6 @@ const PropertyListPage = (props) => {
       store.dispose();
     };
   }, []);
-
-  console.log(props);
-
-  // const doubleClick = (e) => {
-  //   console.log(e.data.id);
-  // };
 
   return (
     <React.Fragment>
@@ -120,9 +108,23 @@ const PropertyListPage = (props) => {
           allowDeleting={true}
           allowUpdating={true}
         >
-          <Popup title="Add Property" showTitle={true} width={700} height={450}>
+          <Popup
+            title="New Property Entry"
+            showTitle={true}
+            width={700}
+            height={350}
+          >
             <Position my="top" at="top" of={window} />
           </Popup>
+          <Form>
+            <Item itemType="group" colCount={2} colSpan={2}>
+              <Item dataField="address" />
+              <Item dataField="city" />
+              <Item dataField="zip" />
+              <Item dataField="stateid" />
+              <Item dataField="gatecode" />
+            </Item>
+          </Form>
         </Editing>
         <Column
           dataField="propertynr"
@@ -136,10 +138,10 @@ const PropertyListPage = (props) => {
           <Lookup
             dataSource={managers}
             displayExpr="initials"
-            valueExpr="id"
+            valueExpr="uid"
             disabled={true}
           />
-          <RequiredRule />
+          {/* <RequiredRule /> */}
         </Column>
         <Column dataField="address" caption="Address">
           <RequiredRule />

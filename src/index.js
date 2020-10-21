@@ -1,14 +1,14 @@
 import "./polyfills";
-import React from "react";
+import React, { Fragment } from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 
 ReactDOM.render(
-  <div>
+  <Fragment>
     <App />
-  </div>,
+  </Fragment>,
   document.getElementById("root")
 );
 
