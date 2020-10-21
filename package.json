@@ -8,13 +8,20 @@
     "@testing-library/user-event": "^7.2.1",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
-    "react-scripts": "3.4.4"
+    "react-scripts": "3.4.4",
+    "node-sass": "^4.11.0",
+    "react-router-dom": "^5.0.0",
+    "react-app-polyfill": "^1.0.0",
+    "devextreme": "20.1-stable",
+    "devextreme-react": "20.1-stable"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build-themes": "devextreme build",
+    "postinstall": "npm run build-themes"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -30,5 +37,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "devextreme-cli": "1.2.3",
+    "devextreme-themebuilder": "20.1-stable"
   }
 }
