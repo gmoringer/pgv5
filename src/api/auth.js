@@ -1,5 +1,4 @@
-import defaultUser from "../utils/default-user";
-import { firebase, auth } from "../firebase";
+import { auth } from "../firebase";
 
 export async function signIn(email, password) {
   let result = {};
@@ -16,21 +15,6 @@ export async function signIn(email, password) {
       };
     });
   return result;
-}
-
-export async function getUser() {
-  try {
-    // Send request
-
-    return {
-      isOk: true,
-      data: defaultUser,
-    };
-  } catch {
-    return {
-      isOk: false,
-    };
-  }
 }
 
 export async function createAccount(email, password) {
