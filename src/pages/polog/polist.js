@@ -54,25 +54,23 @@ const PoListPage = (props) => {
         const result = [];
         await db.getAllPos().then((snap) =>
           snap.forEach((doc) => {
-            const propName = properties.find((property) => {
-              console.log(property);
-              return property.uid === doc.data().property;
-            });
-            console.log(propName);
             result.push({ ...doc.data(), uid: doc.id });
           })
         );
         return result;
       },
       remove: async (key) => {
-        await db.deleteOneJob(key).then(store.load());
+        await db.deleteOnePo(key);
+        store.load();
       },
       insert: async (values) => {
         await db.addNewPo(values, user);
         store.load();
       },
-      update: (key, value) => {
-        db.updateOneJob(key, value).then((res) => store.load());
+      update: async (key, value) => {
+        console.log(value);
+        await db.updatePo(key, value);
+        store.load();
       },
     });
   }, []);

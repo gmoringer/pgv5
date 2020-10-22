@@ -1,4 +1,4 @@
-import { db } from "./firebase";
+import { db, firebase } from "./firebase";
 import Firebase from "firebase";
 import { AuthProvider, useAuth } from "../contexts/auth";
 
@@ -59,8 +59,75 @@ export const updateOneJob = async (key, value) =>
 export const getLastJob = () =>
   db.collection("jobs").orderBy("jobnr", "desc").limit(1).get();
 
+export const updateJobPrice = (value, job) => {
+  const amount = parseInt(value);
+  const increment = firebase.firestore.FieldValue.increment(amount);
+  db.collection("jobs").doc(job).update({ materialssum: increment });
+};
+
 //PO API
 export const getAllPos = () => db.collection("pos").get();
+export const getLastPo = () =>
+  db.collection("pos").orderBy("ponr", "desc").limit(1).get();
+export const addNewPo = async (po, user) => {
+  const lastNr = await getLastPo();
+  const poNr =
+    lastNr.docs.length === 0
+      ? parseInt(process.env.REACT_APP_FIRST_PO_NR)
+      : lastNr.docs[0].data().ponr + 1;
+  db.collection("pos")
+    .add({
+      ...po,
+      date: Firebase.firestore.Timestamp.now(),
+      ponr: poNr,
+      am: user.uid,
+    })
+    .then((res) => updateJobPrice(parseInt(po.amount), po.jobnr));
+};
+
+export const getOnePo = async (key) => db.collection("pos").doc(key).get();
+
+export const updatePo = async (key, value) => {
+  const poToUpdate = await getOnePo(key);
+  const { amount, jobnr } = poToUpdate.data();
+  console.log(amount, value);
+  const delta = value.amount - amount;
+  console.log(delta);
+
+  return db
+    .collection("pos")
+    .doc(key)
+    .update({ ...value })
+    .then(updateJobPrice(delta, jobnr));
+};
+
+export const deleteOnePo = async (key) => {
+  const poToDelete = await getOnePo(key);
+  const { amount, jobnr } = poToDelete.data();
+  db.collection("pos")
+    .doc(key)
+    .delete()
+    .then(() => {
+      console.log(`amount: ${amount}, jobnr: ${jobnr}`);
+      updateJobPrice(-1 * amount, jobnr);
+    });
+};
+
+// export const updateOnePo = async (key, value) => {
+//   const poToUpdate = await getOnePo(key);
+//   const { amount, jobnr } = poToUpdate.data();
+
+//   const delta = value - amount;
+
+//   return db
+//     .collection("pos")
+//     .doc(key)
+//     .update()
+//     .then(() => {
+//       console.log(`amount: ${amount}, jobnr: ${jobnr}`);
+//       updateJobPrice(delta, jobnr);
+//     });
+// };
 
 // USER API
 

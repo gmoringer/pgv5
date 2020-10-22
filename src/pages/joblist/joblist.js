@@ -159,7 +159,8 @@ const PropertyListPage = (props) => {
         <Column
           dataField={"materialssum"}
           caption={"Materials"}
-          dataType={"date"}
+          dataType="number"
+          format="currency"
           hidingPriority={4}
           allowEditing={false}
         />
