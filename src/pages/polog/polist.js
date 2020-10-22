@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../contexts/auth";
-import { states } from "../../constants";
 import DataSource from "devextreme/data/data_source";
 import { Item } from "devextreme-react/form";
 import DataGrid, {
@@ -18,8 +17,9 @@ import DataGrid, {
 
 import { db } from "../../firebase";
 
-const PropertyListPage = (props) => {
+const PoListPage = (props) => {
   const [managers, setManagers] = useState([]);
+  const [jobs, setJobs] = useState([]);
   const [properties, setProperties] = useState([]);
   const { user } = useAuth();
 
@@ -32,11 +32,18 @@ const PropertyListPage = (props) => {
   }, []);
 
   useEffect(() => {
+    db.getAllJobs().then((res) => {
+      const result = [];
+      res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
+      setJobs(result);
+    });
+  }, []);
+
+  useEffect(() => {
     db.getAllProperties().then((res) => {
       const result = [];
       res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
       setProperties(result);
-      console.log(result);
     });
   }, []);
 
@@ -45,19 +52,23 @@ const PropertyListPage = (props) => {
       key: "uid",
       load: async () => {
         const result = [];
-        await db.getAllJobs().then((snap) =>
+        await db.getAllPos().then((snap) =>
           snap.forEach((doc) => {
+            const propName = properties.find((property) => {
+              console.log(property);
+              return property.uid === doc.data().property;
+            });
+            console.log(propName);
             result.push({ ...doc.data(), uid: doc.id });
           })
         );
-        console.log(result);
         return result;
       },
       remove: async (key) => {
         await db.deleteOneJob(key).then(store.load());
       },
       insert: async (values) => {
-        await db.addNewJob(values, user);
+        await db.addNewPo(values, user);
         store.load();
       },
       update: (key, value) => {
@@ -72,13 +83,11 @@ const PropertyListPage = (props) => {
     };
   }, []);
 
-  // const onEditing = (values) => {
-  //   console.log(values);
-  // };
+  // ACCT #	JOB	AM	PROPERTY	DATE	TYPE	PO NO	 AMT 	PAID BY	VENDOR	REC	DESCRIPTION	EOM
 
   return (
     <React.Fragment>
-      <h2 className={"content-block"}>Job List</h2>
+      <h2 className={"content-block"}>PO Log</h2>
       <DataGrid
         className={"dx-card wide-card"}
         dataSource={store}
@@ -88,7 +97,6 @@ const PropertyListPage = (props) => {
         columnAutoWidth={true}
         columnHidingEnabled={true}
         allowColumnResizing={true}
-        // onEditingStart={onEditing}
         rowAlternationEnabled={true}
       >
         <Paging defaultPageSize={10} />
@@ -109,33 +117,34 @@ const PropertyListPage = (props) => {
             <Position my="top" at="top" of={window} />
           </Popup>
           <Form>
-            <Item itemType="group" colCount={1} colSpan={2}>
-              <Item dataField="property" />
-              <Item dataField="jobtitle" />
-              <Item dataField="price" />
+            <Item itemType="group" colCount={2} colSpan={2}>
+              <Item dataField="jobnr" />
+              <Item dataField="desc" />
+              <Item dataField="amount" />
+              <Item dataField="paidby" />
+              <Item dataField="vendor" />
+              <Item dataField="type" />
             </Item>
           </Form>
         </Editing>
         <Column
-          dataField={"jobnr"}
-          hidingPriority={2}
-          caption="Job Nr."
+          dataField={"ponr"}
+          caption="PO NO"
           dataType="number"
           allowEditing={false}
         />
-        <Column dataField={"property"} caption={"Property"} hidingPriority={5}>
+        <Column dataField={"jobnr"} caption={"Job"} hidingPriority={5}>
           <Lookup
-            dataSource={properties}
+            dataSource={jobs}
             valueExpr={"uid"}
-            displayExpr={"address"}
+            displayExpr={(res) => {
+              const currentProp = properties.find(
+                (job) => job.property === properties.uid
+              );
+              return `${res.jobnr} - ${res.jobtitle} - ${currentProp.address}`;
+            }}
           />
         </Column>
-        <Column
-          dataField={"jobtitle"}
-          caption={"Job Description"}
-          allowSorting={false}
-          hidingPriority={7}
-        />
         <Column
           dataField={"am"}
           caption={"AM"}
@@ -149,41 +158,54 @@ const PropertyListPage = (props) => {
             displayExpr={"initials"}
           />
         </Column>
+        <Column dataField={"property"} caption={"Property"} hidingPriority={5}>
+          <Lookup
+            dataSource={properties}
+            valueExpr={"uid"}
+            displayExpr={"address"}
+          />
+        </Column>
+
         <Column
-          dataField={"price"}
-          caption={"Price"}
-          hidingPriority={3}
-          dataType="number"
-          format="currency"
+          dataField={"date"}
+          caption={"Date"}
+          allowSorting={false}
+          hidingPriority={7}
         />
         <Column
-          dataField={"materialssum"}
-          caption={"Materials"}
-          dataType={"date"}
-          hidingPriority={4}
-          allowEditing={false}
+          dataField={"type"}
+          caption={"Type"}
+          allowSorting={false}
+          hidingPriority={7}
         />
         <Column
-          dataField={"laborsum"}
-          caption={"Labor"}
-          hidingPriority={1}
-          allowEditing={false}
+          dataField={"amount"}
+          caption={"Amount"}
+          allowSorting={false}
+          hidingPriority={7}
         />
         <Column
-          dataField={"profitsum"}
-          caption={"Profit"}
-          hidingPriority={0}
-          allowEditing={false}
+          dataField={"paidby"}
+          caption={"Paid By"}
+          allowSorting={false}
+          hidingPriority={7}
         />
         <Column
-          dataField={"margin"}
-          caption={"Margin"}
-          hidingPriority={0}
-          allowEditing={false}
+          dataField={"vendor"}
+          caption={"Vendor"}
+          allowSorting={false}
+          hidingPriority={7}
+        />
+        <Column
+          dataField={"desc"}
+          caption={"Descritpion"}
+          hidingPriority={6}
+          // allowEditing={false}
+          // disabled={true}
         />
       </DataGrid>
     </React.Fragment>
   );
 };
 
-export default PropertyListPage;
+export default PoListPage;

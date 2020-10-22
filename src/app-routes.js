@@ -5,6 +5,7 @@ import {
   ProfilePage,
   PropertyListPage,
   JobListPage,
+  PoListPage,
 } from "./pages";
 
 const routes = [
@@ -27,6 +28,10 @@ const routes = [
   {
     path: "/joblist",
     component: JobListPage,
+  },
+  {
+    path: "/polog",
+    component: PoListPage,
   },
 ];
 

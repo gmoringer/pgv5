@@ -52,11 +52,7 @@ const PropertyListPage = (props) => {
         store.load();
       },
       update: (key, value) => {
-        props.firebase.db
-          .collection("properties")
-          .doc(key)
-          .update({ ...value })
-          .then(() => store.load());
+        db.updateOneProperty(key, value).then((res) => store.load());
       },
     });
   }, []);

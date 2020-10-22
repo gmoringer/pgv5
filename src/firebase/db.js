@@ -25,6 +25,12 @@ export const addNewProperty = async (property, user) => {
 export const getLastProperty = () =>
   db.collection("properties").orderBy("propertynr", "desc").limit(1).get();
 
+export const updateOneProperty = async (key, value) =>
+  await db
+    .collection("properties")
+    .doc(key)
+    .update({ ...value });
+
 // JOB API
 
 export const getAllJobs = () => db.collection("jobs").get();
@@ -52,6 +58,9 @@ export const updateOneJob = async (key, value) =>
 
 export const getLastJob = () =>
   db.collection("jobs").orderBy("jobnr", "desc").limit(1).get();
+
+//PO API
+export const getAllPos = () => db.collection("pos").get();
 
 // USER API
 
