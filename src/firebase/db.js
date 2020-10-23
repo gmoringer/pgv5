@@ -91,10 +91,11 @@ export const getOnePo = async (key) => db.collection("pos").doc(key).get();
 
 export const updatePo = async (key, value) => {
   const poOld = await getOnePo(key);
+  const poOldData = poOld.data();
 
-  const oldValue = poOld.data().amount;
-  const newValue = value.amount ? value.amount : poOld.data().amount;
-  const oldJob = poOld.data().jobnr;
+  const oldValue = poOldData.amount;
+  const newValue = value.amount ? value.amount : poOldData.amount;
+  const oldJob = poOldData.jobnr;
   const newJob = value.jobnr ? value.jobnr : oldJob;
 
   await db

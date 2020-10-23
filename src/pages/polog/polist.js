@@ -17,6 +17,7 @@ import DataGrid, {
 } from "devextreme-react/data-grid";
 
 import { db } from "../../firebase";
+import { getAllProperties } from "../../firebase/db";
 
 const PoListPage = (props) => {
   const [managers, setManagers] = useState([]);
@@ -32,11 +33,27 @@ const PoListPage = (props) => {
     });
   }, []);
 
-  useEffect(() => {
-    db.getAllJobs().then((res) => {
-      const result = [];
+  useEffect(async () => {
+    const result = [];
+    await db.getAllProperties().then((res) => {
       res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
-      setJobs(result);
+      setProperties(result);
+    });
+
+    db.getAllJobs().then((res) => {
+      const jobsDownload = [];
+      res.forEach((doc) => {
+        const currentPropNr = result.find((prop) => {
+          return prop.uid === doc.data().property;
+        });
+
+        jobsDownload.push({
+          ...doc.data(),
+          uid: doc.id,
+          propertynr: currentPropNr.propertynr,
+        });
+      });
+      setJobs(jobsDownload);
     });
   }, []);
 
@@ -53,9 +70,9 @@ const PoListPage = (props) => {
       key: "uid",
       load: async () => {
         const result = [];
-        await db.getAllPos().then((snap) =>
-          snap.forEach((doc) => {
-            result.push({ ...doc.data(), uid: doc.id });
+        await db.getAllPos().then((snaps) =>
+          snaps.forEach((snap) => {
+            result.push({ ...snap.data(), uid: snap.id });
           })
         );
         return result;
@@ -81,8 +98,6 @@ const PoListPage = (props) => {
       store.dispose();
     };
   }, []);
-
-  // ACCT #	JOB	AM	PROPERTY	DATE	TYPE	PO NO	 AMT 	PAID BY	VENDOR	REC	DESCRIPTION	EOM
 
   return (
     <React.Fragment>
@@ -137,9 +152,9 @@ const PoListPage = (props) => {
             dataSource={jobs}
             valueExpr={"uid"}
             displayExpr={(res) => {
-              const currentProp = properties.find(
-                (job) => job.property === properties.uid
-              );
+              const currentProp = properties.find((property) => {
+                return property.uid === res.property;
+              });
               return `${res.jobnr} - ${res.jobtitle} - ${currentProp.address}`;
             }}
           />
@@ -161,13 +176,7 @@ const PoListPage = (props) => {
           <Lookup
             dataSource={jobs}
             valueExpr={"uid"}
-            displayExpr={(res) => {
-              const currentProp = properties.find(
-                (job) => job.property === properties.uid
-              );
-              console.log(currentProp);
-              return `${currentProp.propertynr}`;
-            }}
+            displayExpr={(res) => `${res.propertynr}`}
           />
         </Column>
 
