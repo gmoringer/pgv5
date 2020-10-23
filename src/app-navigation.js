@@ -25,6 +25,10 @@ export const navigation = [
         text: "PO Log",
         path: "/polog",
       },
+      {
+        text: "Labor Log",
+        path: "/laborlog",
+      },
 
       {
         text: "Tasks",

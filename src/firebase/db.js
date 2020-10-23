@@ -47,6 +47,8 @@ export const addNewJob = async (job, user) => {
     date: Firebase.firestore.Timestamp.now(),
     jobnr: jobNr,
     am: user.uid,
+    materialssum: 0,
+    laborsum: 0,
   });
 };
 
@@ -88,17 +90,19 @@ export const addNewPo = async (po, user) => {
 export const getOnePo = async (key) => db.collection("pos").doc(key).get();
 
 export const updatePo = async (key, value) => {
-  const poToUpdate = await getOnePo(key);
-  const { amount, jobnr } = poToUpdate.data();
-  console.log(amount, value);
-  const delta = value.amount - amount;
-  console.log(delta);
+  const poOld = await getOnePo(key);
 
-  return db
+  const oldValue = poOld.data().amount;
+  const newValue = value.amount ? value.amount : poOld.data().amount;
+  const oldJob = poOld.data().jobnr;
+  const newJob = value.jobnr ? value.jobnr : oldJob;
+
+  await db
     .collection("pos")
     .doc(key)
-    .update({ ...value })
-    .then(updateJobPrice(delta, jobnr));
+    .update({ ...value, date: Firebase.firestore.Timestamp.now() })
+    .then(updateJobPrice(-oldValue, oldJob))
+    .then(updateJobPrice(newValue, newJob));
 };
 
 export const deleteOnePo = async (key) => {

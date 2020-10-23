@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../contexts/auth";
 import DataSource from "devextreme/data/data_source";
 import { Item } from "devextreme-react/form";
-import Firebase from "firebase";
 import DataGrid, {
   Column,
   Pager,
@@ -18,7 +17,7 @@ import DataGrid, {
 
 import { db } from "../../firebase";
 
-const PoListPage = (props) => {
+const LaborLogListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [properties, setProperties] = useState([]);
@@ -82,11 +81,9 @@ const PoListPage = (props) => {
     };
   }, []);
 
-  // ACCT #	JOB	AM	PROPERTY	DATE	TYPE	PO NO	 AMT 	PAID BY	VENDOR	REC	DESCRIPTION	EOM
-
   return (
     <React.Fragment>
-      <h2 className={"content-block"}>PO Log</h2>
+      <h2 className={"content-block"}>Labor Log</h2>
       <DataGrid
         className={"dx-card wide-card"}
         dataSource={store}
@@ -157,29 +154,19 @@ const PoListPage = (props) => {
             displayExpr={"initials"}
           />
         </Column>
-        <Column dataField={"jobnr"} caption={"Property"} hidingPriority={5}>
+        <Column dataField={"property"} caption={"Property"} hidingPriority={5}>
           <Lookup
-            dataSource={jobs}
+            dataSource={properties}
             valueExpr={"uid"}
-            displayExpr={(res) => {
-              const currentProp = properties.find(
-                (job) => job.property === properties.uid
-              );
-              console.log(currentProp);
-              return `${currentProp.propertynr}`;
-            }}
+            displayExpr={"address"}
           />
         </Column>
 
         <Column
           dataField={"date"}
-          caption={"Last Updated"}
+          caption={"Date"}
           allowSorting={false}
-          dataType="date"
           hidingPriority={7}
-          calculateCellValue={(res) => {
-            return res.date ? res.date.toDate() : null;
-          }}
         />
         <Column
           dataField={"type"}
@@ -192,8 +179,6 @@ const PoListPage = (props) => {
           caption={"Amount"}
           allowSorting={false}
           hidingPriority={7}
-          dataType="number"
-          format="currency"
         />
         <Column
           dataField={"paidby"}
@@ -219,4 +204,4 @@ const PoListPage = (props) => {
   );
 };
 
-export default PoListPage;
+export default LaborLogListPage;

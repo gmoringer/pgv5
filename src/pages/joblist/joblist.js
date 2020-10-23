@@ -169,18 +169,29 @@ const PropertyListPage = (props) => {
           caption={"Labor"}
           hidingPriority={1}
           allowEditing={false}
+          dataType="number"
+          format="currency"
         />
         <Column
           dataField={"profitsum"}
           caption={"Profit"}
           hidingPriority={0}
           allowEditing={false}
+          dataType="number"
+          format="currency"
+          calculateCellValue={(res) =>
+            res.price - (res.laborsum + res.materialssum)
+          }
         />
         <Column
           dataField={"margin"}
           caption={"Margin"}
           hidingPriority={0}
           allowEditing={false}
+          format="percent"
+          calculateCellValue={(res) =>
+            1 - (res.laborsum + res.materialssum) / res.price
+          }
         />
       </DataGrid>
     </React.Fragment>
