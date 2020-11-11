@@ -1,3 +1,6 @@
+import React from "react";
+import { useAuth } from "./contexts/auth";
+
 export const navigation = [
   {
     text: "Home",
@@ -29,11 +32,17 @@ export const navigation = [
         text: "Labor Log",
         path: "/laborlog",
       },
-
-      // {
-      //   text: "Tasks",
-      //   path: "/tasks",
-      // },
     ],
   },
 ];
+
+export const adminNavigation = {
+  text: "Admin",
+  icon: "folder",
+  items: [
+    {
+      text: "Create New User",
+      path: "/newuser",
+    },
+  ],
+};

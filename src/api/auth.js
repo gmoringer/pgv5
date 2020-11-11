@@ -7,7 +7,11 @@ export async function signIn(email, password) {
     .doSignInWithEmailAndPassword(email, password)
     .then(async (res) => {
       const snap = await getOneUser(res.user.uid);
-      const data = { ...snap.data(), uid: res.user.uid };
+      const data = {
+        ...snap.data(),
+        uid: res.user.uid,
+        isAdmin: true,
+      };
       result = { isOk: true, data: data };
     })
     .catch((err) => {
@@ -16,6 +20,7 @@ export async function signIn(email, password) {
         message: err.message,
       };
     });
+  console.log(result);
   return result;
 }
 

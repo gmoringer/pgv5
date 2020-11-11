@@ -7,13 +7,10 @@ import {
   JobListPage,
   PoListPage,
   LaborLogListPage,
+  CreateNewAccount,
 } from "./pages";
 
 const routes = [
-  // {
-  //   path: "/tasks",
-  //   component: TasksPage,
-  // },
   {
     path: "/profile",
     component: ProfilePage,
@@ -38,6 +35,7 @@ const routes = [
     path: "/laborlog",
     component: LaborLogListPage,
   },
+  { path: "/create-account", component: CreateNewAccount },
 ];
 
 export default routes.map((route) => {
