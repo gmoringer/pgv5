@@ -22,13 +22,13 @@ const PropertyListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const { user } = useAuth();
 
+  console.log(user);
+
   useEffect(() => {
     db.getAllUsers().then((res) => {
       const result = [];
-      console.log(res);
       res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
       setManagers(result);
-      console.log(result);
     });
   }, []);
 
