@@ -10,10 +10,10 @@ import {
 } from "./pages";
 
 const routes = [
-  {
-    path: "/tasks",
-    component: TasksPage,
-  },
+  // {
+  //   path: "/tasks",
+  //   component: TasksPage,
+  // },
   {
     path: "/profile",
     component: ProfilePage,

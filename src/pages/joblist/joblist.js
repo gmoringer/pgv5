@@ -36,7 +36,6 @@ const PropertyListPage = (props) => {
       const result = [];
       res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
       setProperties(result);
-      console.log(result);
     });
   }, []);
 
@@ -50,7 +49,6 @@ const PropertyListPage = (props) => {
             result.push({ ...doc.data(), uid: doc.id });
           })
         );
-        console.log(result);
         return result;
       },
       remove: async (key) => {

@@ -71,6 +71,7 @@ export const updateJobPrice = (value, job) => {
 export const getAllPos = () => db.collection("pos").get();
 export const getLastPo = () =>
   db.collection("pos").orderBy("ponr", "desc").limit(1).get();
+
 export const addNewPo = async (po, user) => {
   const lastNr = await getLastPo();
   const poNr =
@@ -118,6 +119,25 @@ export const deleteOnePo = async (key) => {
     });
 };
 
+//API LABOR
+export const getAllLaborLogs = () => db.collection("labor").get();
+
+export const addNewLaborLog = async (ll, user) => {
+  db.collection("labor")
+    .add({
+      ...ll,
+      am: user.uid,
+    })
+    .then((res) =>
+      updateLaborPrice(parseInt(ll.hours * ll.wage * 1.25), ll.jobnr)
+    );
+};
+
+export const updateLaborPrice = (value, job) => {
+  const amount = parseInt(value);
+  const increment = firebase.firestore.FieldValue.increment(amount);
+  db.collection("jobs").doc(job).update({ laborsum: increment });
+};
 // export const updateOnePo = async (key, value) => {
 //   const poToUpdate = await getOnePo(key);
 //   const { amount, jobnr } = poToUpdate.data();

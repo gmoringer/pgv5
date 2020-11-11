@@ -30,10 +30,10 @@ export const navigation = [
         path: "/laborlog",
       },
 
-      {
-        text: "Tasks",
-        path: "/tasks",
-      },
+      // {
+      //   text: "Tasks",
+      //   path: "/tasks",
+      // },
     ],
   },
 ];

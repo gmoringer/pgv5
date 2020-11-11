@@ -78,8 +78,7 @@ const PoListPage = (props) => {
         return result;
       },
       remove: async (key) => {
-        await db.deleteOnePo(key);
-        store.load();
+        await db.deleteOnePo(key).then(() => store.load());
       },
       insert: async (values) => {
         await db.addNewPo(values, user);
@@ -122,12 +121,7 @@ const PoListPage = (props) => {
           allowDeleting={true}
           allowUpdating={true}
         >
-          <Popup
-            title="New Job Entry"
-            showTitle={true}
-            width={700}
-            height={350}
-          >
+          <Popup title="New PO Entry" showTitle={true} width={700} height={350}>
             <Position my="top" at="top" of={window} />
           </Popup>
           <Form>
@@ -146,6 +140,7 @@ const PoListPage = (props) => {
           caption="PO NO"
           dataType="number"
           allowEditing={false}
+          alignment="left"
         />
         <Column dataField={"jobnr"} caption={"Job"} hidingPriority={5}>
           <Lookup
@@ -155,10 +150,24 @@ const PoListPage = (props) => {
               const currentProp = properties.find((property) => {
                 return property.uid === res.property;
               });
-              return `${res.jobnr} - ${res.jobtitle} - ${currentProp.address}`;
+              return `${res.jobtitle} (${res.jobnr}) @ ${currentProp.address}`;
             }}
           />
         </Column>
+        {/* <Column dataField={"jobnr"} caption={"Property"} hidingPriority={5}>
+          <Lookup
+            dataSource={jobs}
+            valueExpr={"uid"}
+            displayExpr={(res) => {
+              console.log(store._items);
+              const currentProp = properties.find((property) => {
+                return property.uid === res.property;
+              });
+              return `${currentProp.address} (${res.propertynr})`;
+            }}
+          />
+        </Column> */}
+
         <Column
           dataField={"am"}
           caption={"AM"}
@@ -170,13 +179,6 @@ const PoListPage = (props) => {
             dataSource={managers}
             valueExpr={"uid"}
             displayExpr={"initials"}
-          />
-        </Column>
-        <Column dataField={"jobnr"} caption={"Property"} hidingPriority={5}>
-          <Lookup
-            dataSource={jobs}
-            valueExpr={"uid"}
-            displayExpr={(res) => `${res.propertynr}`}
           />
         </Column>
 

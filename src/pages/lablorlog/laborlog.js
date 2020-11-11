@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../contexts/auth";
 import DataSource from "devextreme/data/data_source";
 import { Item } from "devextreme-react/form";
+import Firebase from "firebase";
 import DataGrid, {
   Column,
   Pager,
@@ -16,8 +17,9 @@ import DataGrid, {
 } from "devextreme-react/data-grid";
 
 import { db } from "../../firebase";
+import { getAllProperties } from "../../firebase/db";
 
-const LaborLogListPage = (props) => {
+const PoListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [properties, setProperties] = useState([]);
@@ -31,11 +33,27 @@ const LaborLogListPage = (props) => {
     });
   }, []);
 
-  useEffect(() => {
-    db.getAllJobs().then((res) => {
-      const result = [];
+  useEffect(async () => {
+    const result = [];
+    await db.getAllProperties().then((res) => {
       res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
-      setJobs(result);
+      setProperties(result);
+    });
+
+    db.getAllJobs().then((res) => {
+      const jobsDownload = [];
+      res.forEach((doc) => {
+        const currentPropNr = result.find((prop) => {
+          return prop.uid === doc.data().property;
+        });
+
+        jobsDownload.push({
+          ...doc.data(),
+          uid: doc.id,
+          propertynr: currentPropNr.propertynr,
+        });
+      });
+      setJobs(jobsDownload);
     });
   }, []);
 
@@ -52,24 +70,23 @@ const LaborLogListPage = (props) => {
       key: "uid",
       load: async () => {
         const result = [];
-        await db.getAllPos().then((snap) =>
-          snap.forEach((doc) => {
-            result.push({ ...doc.data(), uid: doc.id });
+        await db.getAllLaborLogs().then((snaps) =>
+          snaps.forEach((snap) => {
+            result.push({ ...snap.data(), uid: snap.id });
           })
         );
         return result;
       },
       remove: async (key) => {
-        await db.deleteOnePo(key);
-        store.load();
+        await db.deleteOneLaborLog(key).then(() => store.load());
       },
       insert: async (values) => {
-        await db.addNewPo(values, user);
+        await db.addNewLaborLog(values, user);
         store.load();
       },
       update: async (key, value) => {
         console.log(value);
-        await db.updatePo(key, value);
+        await db.updateLaborLog(key, value);
         store.load();
       },
     });
@@ -104,43 +121,33 @@ const LaborLogListPage = (props) => {
           allowDeleting={true}
           allowUpdating={true}
         >
-          <Popup
-            title="New Job Entry"
-            showTitle={true}
-            width={700}
-            height={350}
-          >
+          <Popup title="New PO Entry" showTitle={true} width={700} height={350}>
             <Position my="top" at="top" of={window} />
           </Popup>
           <Form>
             <Item itemType="group" colCount={2} colSpan={2}>
               <Item dataField="jobnr" />
-              <Item dataField="desc" />
-              <Item dataField="amount" />
-              <Item dataField="paidby" />
-              <Item dataField="vendor" />
-              <Item dataField="type" />
+              <Item dataField="date" />
+              <Item dataField="hours" />
+              <Item dataField="wage" />
+              <Item dataField="name" />
+              <Item dataField="notes" />
             </Item>
           </Form>
         </Editing>
-        <Column
-          dataField={"ponr"}
-          caption="PO NO"
-          dataType="number"
-          allowEditing={false}
-        />
         <Column dataField={"jobnr"} caption={"Job"} hidingPriority={5}>
           <Lookup
             dataSource={jobs}
             valueExpr={"uid"}
             displayExpr={(res) => {
-              const currentProp = properties.find(
-                (job) => job.property === properties.uid
-              );
-              return `${res.jobnr} - ${res.jobtitle} - ${currentProp.address}`;
+              const currentProp = properties.find((property) => {
+                return property.uid === res.property;
+              });
+              return `${res.jobtitle} (${res.jobnr}) @ ${currentProp.address}`;
             }}
           />
         </Column>
+
         <Column
           dataField={"am"}
           caption={"AM"}
@@ -154,54 +161,30 @@ const LaborLogListPage = (props) => {
             displayExpr={"initials"}
           />
         </Column>
-        <Column dataField={"property"} caption={"Property"} hidingPriority={5}>
-          <Lookup
-            dataSource={properties}
-            valueExpr={"uid"}
-            displayExpr={"address"}
-          />
-        </Column>
 
         <Column
           dataField={"date"}
-          caption={"Date"}
+          caption={"Date Worked"}
           allowSorting={false}
+          dataType="date"
           hidingPriority={7}
+          calculateCellValue={(res) => {
+            return res.date ? res.date.toDate() : null;
+          }}
         />
+        <Column dataField={"name"} caption={"Name"} allowSorting={true} />
+        <Column dataField={"hours"} caption={"Hours"} allowSorting={false} />
+        <Column dataField={"wage"} caption={"Wage"} allowSorting={false} />
         <Column
-          dataField={"type"}
-          caption={"Type"}
+          dataField={"cost"}
+          caption={"Cost"}
           allowSorting={false}
-          hidingPriority={7}
+          calculateCellValue={(res) => res.hours * res.wage * 1.25}
         />
-        <Column
-          dataField={"amount"}
-          caption={"Amount"}
-          allowSorting={false}
-          hidingPriority={7}
-        />
-        <Column
-          dataField={"paidby"}
-          caption={"Paid By"}
-          allowSorting={false}
-          hidingPriority={7}
-        />
-        <Column
-          dataField={"vendor"}
-          caption={"Vendor"}
-          allowSorting={false}
-          hidingPriority={7}
-        />
-        <Column
-          dataField={"desc"}
-          caption={"Descritpion"}
-          hidingPriority={6}
-          // allowEditing={false}
-          // disabled={true}
-        />
+        <Column dataField={"notes"} caption={"Notes"} allowSorting={false} />
       </DataGrid>
     </React.Fragment>
   );
 };
 
-export default LaborLogListPage;
+export default PoListPage;
