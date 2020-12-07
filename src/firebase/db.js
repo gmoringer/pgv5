@@ -6,8 +6,21 @@ import { AuthProvider, useAuth } from "../contexts/auth";
 
 export const getAllProperties = () => db.collection("properties").get();
 
+export const getAllVendors = () => db.collection("vendors").get();
+
+export const deleteOneVendor = (key) =>
+  db.collection("vendors").doc(key).delete();
+
 export const deleteOneProperty = (key) =>
   db.collection("properties").doc(key).delete();
+
+  export const addNewVendor = async (vendor, user) => {
+  return db.collection("vendors").add({
+    ...vendor,
+    date: Firebase.firestore.Timestamp.now(),
+    am: user.uid
+  });
+};
 
 export const addNewProperty = async (property, user) => {
   const lastNr = await getLastProperty();
@@ -25,11 +38,22 @@ export const addNewProperty = async (property, user) => {
 export const getLastProperty = () =>
   db.collection("properties").orderBy("propertynr", "desc").limit(1).get();
 
+export const getLastVendor = () =>
+  db.collection("vendor").orderBy("vendornr", "desc").limit(1).get();
+
 export const updateOneProperty = async (key, value) =>
   await db
     .collection("properties")
     .doc(key)
     .update({ ...value });
+
+
+export const updateOneVendor = async (key, value) =>
+  await db
+    .collection("vendors")
+    .doc(key)
+    .update({ ...value });
+
 
 // JOB API
 
@@ -93,6 +117,7 @@ export const getOnePo = async (key) => db.collection("pos").doc(key).get();
 export const updatePo = async (key, value) => {
   const poOld = await getOnePo(key);
   const poOldData = poOld.data();
+  console.log(value);
 
   const oldValue = poOldData.amount;
   const newValue = value.amount ? value.amount : poOldData.amount;
@@ -138,33 +163,29 @@ export const updateLaborPrice = (value, job) => {
   const increment = firebase.firestore.FieldValue.increment(amount);
   db.collection("jobs").doc(job).update({ laborsum: increment });
 };
-// export const updateOnePo = async (key, value) => {
-//   const poToUpdate = await getOnePo(key);
-//   const { amount, jobnr } = poToUpdate.data();
 
-//   const delta = value - amount;
-
-//   return db
-//     .collection("pos")
-//     .doc(key)
-//     .update()
-//     .then(() => {
-//       console.log(`amount: ${amount}, jobnr: ${jobnr}`);
-//       updateJobPrice(delta, jobnr);
-//     });
-// };
-
-// USER API
-
-export const doCreateUser = (id, initials, fullname, email) =>
-  db.collection("users").doc(id).set({
+export const doCreateUser = (id, initials, fullname, email, isAdmin) => {
+  return db.collection("users").doc(id).set({
     initials,
     fullname,
     email,
+    isAdmin,
+    isActive: true,
   });
+};
 
 export const getOneUser = (id) => db.collection("users").doc(id).get();
+export const updateOneUser = (key, value) => {
+  return db
+    .collection("users")
+    .doc(key)
+    .update({ ...value });
+};
 export const getAllUsers = () => db.collection("users").get();
+
+export const getPoTypes = () => {
+  return db.collection("potypes").get();
+};
 
 // export const doCreateUser = (id, username, email) =>
 //   db.ref(`users/${id}`).set({

@@ -6,3 +6,6 @@ export { default as JobListPage } from "./joblist/joblist";
 export { default as PoListPage } from "./polog/polist";
 export { default as LaborLogListPage } from "./lablorlog/laborlog";
 export { default as CreateNewAccount } from "./CreateNewAccount/CreateNewAccount";
+export { default as AllUsers } from "./allusers/AllUsers";
+export { default as LastWorked } from "./LastWorked/LastWorked";
+export { default as VendorListPage } from "./vendorlist/vendorlist";

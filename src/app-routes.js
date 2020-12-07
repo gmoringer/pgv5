@@ -8,6 +8,9 @@ import {
   PoListPage,
   LaborLogListPage,
   CreateNewAccount,
+  AllUsers,
+  LastWorked,
+  VendorListPage
 } from "./pages";
 
 const routes = [
@@ -35,7 +38,13 @@ const routes = [
     path: "/laborlog",
     component: LaborLogListPage,
   },
-  { path: "/create-account", component: CreateNewAccount },
+    {
+    path: "/vendorlist",
+    component: VendorListPage,
+  },
+  { path: "/createuser", component: CreateNewAccount },
+  { path: "/allusers", component: AllUsers },
+  { path: "/lastworked", component: LastWorked },
 ];
 
 export default routes.map((route) => {

@@ -6,7 +6,13 @@ export default () => (
   <React.Fragment>
     <h2 className={"content-block"}>Home</h2>
     <div className={"content-block"}>
-      <div className={"dx-card responsive-paddings"}>
+      <div
+        className={"dx-card responsive-paddings"}
+        style={{
+          backgroundColor: "rgba(103, 119, 81, 1)",
+          margin: "auto",
+        }}
+      >
         <div className={"logos-container"}>
           <img className={"pg-logo"} src={pgLogo} alt="NO" />
         </div>

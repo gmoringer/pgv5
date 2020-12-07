@@ -17,13 +17,31 @@ import DataGrid, {
 } from "devextreme-react/data-grid";
 
 import { db } from "../../firebase";
-import { getAllProperties } from "../../firebase/db";
 
 const PoListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const [jobs, setJobs] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [properties, setProperties] = useState([]);
+  const [potypes, setPoTypes] = useState();
   const { user } = useAuth();
+
+  useEffect(async () => {
+    const potypes = await db.getPoTypes();
+    const result = [];
+    potypes.forEach((doc) => {
+      result.push({ ...doc.data(), uid: doc.uid });
+    });
+    setPoTypes(result);
+  }, []);
+
+    useEffect(() => {
+    db.getAllVendors().then((res) => {
+      const result = [];
+      res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
+      setVendors(result);
+    });
+  }, []);
 
   useEffect(() => {
     db.getAllUsers().then((res) => {
@@ -154,19 +172,6 @@ const PoListPage = (props) => {
             }}
           />
         </Column>
-        {/* <Column dataField={"jobnr"} caption={"Property"} hidingPriority={5}>
-          <Lookup
-            dataSource={jobs}
-            valueExpr={"uid"}
-            displayExpr={(res) => {
-              console.log(store._items);
-              const currentProp = properties.find((property) => {
-                return property.uid === res.property;
-              });
-              return `${currentProp.address} (${res.propertynr})`;
-            }}
-          />
-        </Column> */}
 
         <Column
           dataField={"am"}
@@ -197,7 +202,13 @@ const PoListPage = (props) => {
           caption={"Type"}
           allowSorting={false}
           hidingPriority={7}
-        />
+        >
+          <Lookup
+            dataSource={potypes}
+            valueExpr={"code"}
+            displayExpr={"code"}
+          />
+        </Column>
         <Column
           dataField={"amount"}
           caption={"Amount"}
@@ -217,7 +228,15 @@ const PoListPage = (props) => {
           caption={"Vendor"}
           allowSorting={false}
           hidingPriority={7}
-        />
+        > <Lookup
+            dataSource={vendors}
+            valueExpr={"uid"}
+            displayExpr={"name"}
+             disabled={true}
+             allowEditing={false}
+          />
+          <RequiredRule />
+          </Column>
         <Column
           dataField={"desc"}
           caption={"Descritpion"}

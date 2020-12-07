@@ -21,11 +21,11 @@ export default function (props) {
 
   const { isLarge } = useScreenSize();
   function normalizePath() {
-    if (user) {
-      navigation.push(adminNavigation);
-      console.log(navigation);
+    const nav = [...navigation];
+    if (user.isAdmin === true) {
+      nav.push(adminNavigation);
     }
-    return navigation.map((item) => {
+    return nav.map((item) => {
       if (item.path && !/^\//.test(item.path)) {
         item.path = `/${item.path}`;
       }

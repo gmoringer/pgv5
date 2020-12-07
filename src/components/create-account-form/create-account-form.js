@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from "react";
 import { Link, useHistory } from "react-router-dom";
+import { CheckBox } from "devextreme-react/check-box";
 import Form, {
   Item,
   Label,
@@ -19,16 +20,25 @@ export default function (props) {
   const [loading, setLoading] = useState(false);
   const formData = useRef({});
 
+  const [isAdmin, setAdmin] = useState(false);
+
+  const isAdminChanged = (e) => {
+    console.log(e.value);
+  };
   const onSubmit = useCallback(
     async (e) => {
       e.preventDefault();
       setLoading(true);
 
-      const result = await createAccount(formData.current);
+      const result = await createAccount({
+        ...formData.current,
+        isAdmin: isAdmin,
+        isActive: true,
+      });
       setLoading(false);
 
       if (result.isOk) {
-        history.push("/login");
+        history.push("/allusers");
       } else {
         notify(result.message, "error", 2000);
       }
@@ -90,9 +100,16 @@ export default function (props) {
           <Label visible={false} />
         </Item>
         <Item>
+          <div className="dx-field">
+            <div className="dx-field-label">Admin?</div>
+            {/* <div className="dx-field-value"> */}
+            <CheckBox name="isAdmin" defaultValue={false} />
+            {/* </div> */}
+          </div>
+        </Item>
+        <Item>
           <div className="policy-info">
-            By creating an account, you agree to be diligent and respectful of
-            the data you enter into the Pacific Gardens and Company App!
+            <br></br>
           </div>
         </Item>
         <ButtonItem>
@@ -110,11 +127,11 @@ export default function (props) {
             </span>
           </ButtonOptions>
         </ButtonItem>
-        <Item>
+        {/* <Item>
           <div className={"login-link"}>
             Have an account? <Link to={"/login"}>Sign In</Link>
           </div>
-        </Item>
+        </Item> */}
       </Form>
     </form>
   );

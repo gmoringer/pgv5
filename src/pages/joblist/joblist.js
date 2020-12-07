@@ -70,10 +70,6 @@ const PropertyListPage = (props) => {
     };
   }, []);
 
-  // const onEditing = (values) => {
-  //   console.log(values);
-  // };
-
   return (
     <React.Fragment>
       <h2 className={"content-block"}>Job List</h2>
@@ -86,7 +82,6 @@ const PropertyListPage = (props) => {
         columnAutoWidth={true}
         columnHidingEnabled={true}
         allowColumnResizing={true}
-        // onEditingStart={onEditing}
         rowAlternationEnabled={true}
       >
         <Paging defaultPageSize={10} />
@@ -102,15 +97,18 @@ const PropertyListPage = (props) => {
             title="New Job Entry"
             showTitle={true}
             width={700}
-            height={350}
+            height={450}
           >
             <Position my="top" at="top" of={window} />
           </Popup>
           <Form>
-            <Item itemType="group" colCount={1} colSpan={2}>
+            <Item itemType="group" colCount={2} colSpan={2}>
               <Item dataField="property" />
               <Item dataField="jobtitle" />
               <Item dataField="price" />
+              <Item dataField="dateapproved" />
+              <Item dataField="sub" />
+              <Item dataField="completed" />
             </Item>
           </Form>
         </Editing>
@@ -135,6 +133,16 @@ const PropertyListPage = (props) => {
           hidingPriority={7}
         />
         <Column
+          dataField={"dateapproved"}
+          caption={"Date Approved"}
+          dataType="date"
+          allowSorting={false}
+          hidingPriority={7}
+          calculateCellValue={(res) => {
+            return res.dateapproved ? res.dateapproved.toDate() : "";
+          }}
+        />
+        <Column
           dataField={"am"}
           caption={"AM"}
           hidingPriority={6}
@@ -154,6 +162,7 @@ const PropertyListPage = (props) => {
           dataType="number"
           format="currency"
         />
+
         <Column
           dataField={"materialssum"}
           caption={"Materials"}
@@ -190,6 +199,18 @@ const PropertyListPage = (props) => {
           calculateCellValue={(res) =>
             1 - (res.laborsum + res.materialssum) / res.price
           }
+        />
+        <Column
+          dataField="sub"
+          caption="Sub?"
+          dataType="boolean"
+          alignment="center"
+        />
+        <Column
+          dataField="completed"
+          caption="Inv?"
+          dataType="boolean"
+          alignment="center"
         />
       </DataGrid>
     </React.Fragment>

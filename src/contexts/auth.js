@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { signIn as sendSignInRequest } from "../api/auth";
-import { firebase, auth } from "../firebase";
+import { firebase, auth, db } from "../firebase";
 
 function AuthProvider(props) {
   const [user, setUser] = useState();
@@ -15,7 +15,11 @@ function AuthProvider(props) {
   useEffect(() => {
     firebase.auth.onAuthStateChanged((usr) => {
       if (usr) {
-        setUser(usr);
+        db.getOneUser(usr.uid).then((user) => {
+          const isAdmin = user.data().isAdmin ? true : false;
+          const newUser = { ...user.data(), isAdmin: isAdmin, uid: usr.uid };
+          setUser(newUser);
+        });
       }
       setLoading(false);
     });
@@ -24,7 +28,12 @@ function AuthProvider(props) {
   const signIn = useCallback(async (email, password) => {
     const result = await sendSignInRequest(email, password);
     if (result.isOk) {
-      setUser(result.data);
+      await db.getOneUser(result.data.uid).then((user) => {
+        const isAdmin = user.data().isAdmin ? true : false;
+        const newUser = { ...user.data(), isAdmin: isAdmin };
+        console.log(newUser);
+        setUser(newUser);
+      });
     }
 
     return result;

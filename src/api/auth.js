@@ -10,7 +10,6 @@ export async function signIn(email, password) {
       const data = {
         ...snap.data(),
         uid: res.user.uid,
-        isAdmin: true,
       };
       result = { isOk: true, data: data };
     })
@@ -20,19 +19,19 @@ export async function signIn(email, password) {
         message: err.message,
       };
     });
-  console.log(result);
   return result;
 }
 
 export async function createAccount(value) {
-  const { email, password, initials, fullname } = value;
+  const { email, password, initials, fullname, isAdmin } = value;
+  console.log(isAdmin)
   let result = {};
 
   await auth
     .doCreateUserWithEmailAndPassword(email, password)
     .then(async (res) => {
       const { uid } = res.user;
-      await doCreateUser(uid, initials, fullname, email);
+      await doCreateUser(uid, initials, fullname, email, isAdmin);
       result = { isOk: true };
     })
     .catch((err) => {

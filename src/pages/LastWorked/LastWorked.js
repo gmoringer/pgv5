@@ -14,12 +14,11 @@ import DataGrid, {
   Popup,
   Position,
   Form,
-  Button,
 } from "devextreme-react/data-grid";
 
 import { db } from "../../firebase";
 
-const PropertyListPage = (props) => {
+const LastWorked = (props) => {
   const [managers, setManagers] = useState([]);
   const { user } = useAuth();
   console.log(user);
@@ -63,20 +62,9 @@ const PropertyListPage = (props) => {
     };
   }, []);
 
-  const catchEditing = (e) => {
-    // console.log(e);
-  };
-
-  const isPropertyManager = (e) => {
-    if (e.row.values[2] === user.uid || user.isAdmin) {
-      return true;
-    }
-    return false;
-  };
-
   return (
     <React.Fragment>
-      <h2 className={"content-block"}>Property List</h2>
+      <h2 className={"content-block"}>ADMIN - Last Worked</h2>
       <DataGrid
         className={"dx-card wide-card"}
         dataSource={store}
@@ -87,7 +75,6 @@ const PropertyListPage = (props) => {
         columnHidingEnabled={true}
         allowColumnResizing={true}
         rowAlternationEnabled={true}
-        onEditorPreparing={catchEditing}
       >
         <Paging defaultPageSize={10} />
         <Pager showPageSizeSelector={true} showInfo={true} />
@@ -95,7 +82,7 @@ const PropertyListPage = (props) => {
         <Editing
           mode="popup"
           allowAdding={true}
-          allowDeleting={user.isAdmin}
+          allowDeleting={true}
           allowUpdating={true}
         >
           <Popup
@@ -116,16 +103,6 @@ const PropertyListPage = (props) => {
             </Item>
           </Form>
         </Editing>
-        <Column type="buttons" width={110}>
-          <Button name="edit" visible={isPropertyManager} />
-          <Button name="delete" />
-          {/* <Button
-            hint="Clone"
-            icon="repeat"
-            visible={true}
-            // onClick={this.cloneIconClick}
-          />  */}
-        </Column>
         <Column
           dataField="propertynr"
           caption="Property Nr."
@@ -178,4 +155,4 @@ const PropertyListPage = (props) => {
   );
 };
 
-export default PropertyListPage;
+export default LastWorked;
