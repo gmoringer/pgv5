@@ -14,11 +14,11 @@ export const deleteOneVendor = (key) =>
 export const deleteOneProperty = (key) =>
   db.collection("properties").doc(key).delete();
 
-  export const addNewVendor = async (vendor, user) => {
+export const addNewVendor = async (vendor, user) => {
   return db.collection("vendors").add({
     ...vendor,
     date: Firebase.firestore.Timestamp.now(),
-    am: user.uid
+    am: user.uid,
   });
 };
 
@@ -47,13 +47,11 @@ export const updateOneProperty = async (key, value) =>
     .doc(key)
     .update({ ...value });
 
-
 export const updateOneVendor = async (key, value) =>
   await db
     .collection("vendors")
     .doc(key)
     .update({ ...value });
-
 
 // JOB API
 

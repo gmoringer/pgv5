@@ -14,14 +14,26 @@ import DataGrid, {
   Popup,
   Position,
   Form,
+  Button,
+  Export
 } from "devextreme-react/data-grid";
 
 import { db } from "../../firebase";
+
 
 const PropertyListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const [properties, setProperties] = useState([]);
   const { user } = useAuth();
+
+    const isPropertyManager = (e) => {
+      console.log(e.row.values[5])
+    if (e.row.values[5] === user.uid || user.isAdmin) {
+      return true;
+    }
+    return false;
+  };
+
 
   useEffect(() => {
     db.getAllUsers().then((res) => {
@@ -84,13 +96,14 @@ const PropertyListPage = (props) => {
         allowColumnResizing={true}
         rowAlternationEnabled={true}
       >
+      <Export enabled={true} />
         <Paging defaultPageSize={10} />
         <Pager showPageSizeSelector={true} showInfo={true} />
         <FilterRow visible={true} />
         <Editing
           mode="popup"
           allowAdding={true}
-          allowDeleting={true}
+          allowDeleting={user.isAdmin}
           allowUpdating={true}
         >
           <Popup
@@ -112,6 +125,16 @@ const PropertyListPage = (props) => {
             </Item>
           </Form>
         </Editing>
+        <Column type="buttons" width={110}>
+          <Button name="edit" visible={isPropertyManager} />
+          <Button name="delete" />
+          {/* <Button
+            hint="Clone"
+            icon="repeat"
+            visible={true}
+            // onClick={this.cloneIconClick}
+          />  */}
+        </Column>
         <Column
           dataField={"jobnr"}
           hidingPriority={2}
