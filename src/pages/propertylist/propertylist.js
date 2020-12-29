@@ -15,6 +15,7 @@ import DataGrid, {
   Position,
   Form,
   Button,
+  Export
 } from "devextreme-react/data-grid";
 
 import { db } from "../../firebase";
@@ -89,6 +90,7 @@ const PropertyListPage = (props) => {
         rowAlternationEnabled={true}
         onEditorPreparing={catchEditing}
       >
+        <Export enabled={true} />
         <Paging defaultPageSize={10} />
         <Pager showPageSizeSelector={true} showInfo={true} />
         <FilterRow visible={true} />

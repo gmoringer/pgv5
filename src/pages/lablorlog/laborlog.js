@@ -14,6 +14,7 @@ import DataGrid, {
   Popup,
   Position,
   Form,
+  Button
 } from "devextreme-react/data-grid";
 
 import { db } from "../../firebase";
@@ -24,6 +25,14 @@ const PoListPage = (props) => {
   const [jobs, setJobs] = useState([]);
   const [properties, setProperties] = useState([]);
   const { user } = useAuth();
+const isPropertyManager = (e) => {
+      console.log(e.row.values[2])
+    if (e.row.values[2] === user.uid || user.isAdmin) {
+      return true;
+    }
+    return false;
+  };
+  
 
   useEffect(() => {
     db.getAllUsers().then((res) => {
@@ -118,7 +127,7 @@ const PoListPage = (props) => {
         <Editing
           mode="popup"
           allowAdding={true}
-          allowDeleting={true}
+          allowDeleting={user.isAdmin}
           allowUpdating={true}
         >
           <Popup title="New PO Entry" showTitle={true} width={700} height={350}>
@@ -135,6 +144,10 @@ const PoListPage = (props) => {
             </Item>
           </Form>
         </Editing>
+                  <Column type="buttons" width={110}>
+          <Button name="edit" visible={isPropertyManager} />
+          <Button name="delete" />
+        </Column>
         <Column dataField={"jobnr"} caption={"Job"} hidingPriority={5}>
           <Lookup
             dataSource={jobs}

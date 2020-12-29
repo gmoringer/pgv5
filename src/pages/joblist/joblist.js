@@ -14,6 +14,8 @@ import DataGrid, {
   Popup,
   Position,
   Form,
+  Button,
+  Export,
 } from "devextreme-react/data-grid";
 
 import { db } from "../../firebase";
@@ -22,6 +24,13 @@ const PropertyListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const [properties, setProperties] = useState([]);
   const { user } = useAuth();
+
+  const isPropertyManager = (e) => {
+    if (e.row.values[5] === user.uid || user.isAdmin) {
+      return true;
+    }
+    return false;
+  };
 
   useEffect(() => {
     db.getAllUsers().then((res) => {
@@ -84,13 +93,14 @@ const PropertyListPage = (props) => {
         allowColumnResizing={true}
         rowAlternationEnabled={true}
       >
+        <Export enabled={true} />
         <Paging defaultPageSize={10} />
         <Pager showPageSizeSelector={true} showInfo={true} />
         <FilterRow visible={true} />
         <Editing
           mode="popup"
           allowAdding={true}
-          allowDeleting={true}
+          allowDeleting={user.isAdmin}
           allowUpdating={true}
         >
           <Popup
@@ -112,6 +122,10 @@ const PropertyListPage = (props) => {
             </Item>
           </Form>
         </Editing>
+        <Column type="buttons" width={110}>
+          <Button name="edit" visible={isPropertyManager} />
+          <Button name="delete" />
+        </Column>
         <Column
           dataField={"jobnr"}
           hidingPriority={2}
@@ -137,8 +151,8 @@ const PropertyListPage = (props) => {
           caption={"Date Approved"}
           dataType="date"
           allowSorting={false}
-          hidingPriority={7}
           calculateCellValue={(res) => {
+            // console.log(res);
             return res.dateapproved ? res.dateapproved.toDate() : "";
           }}
         />
@@ -205,12 +219,14 @@ const PropertyListPage = (props) => {
           caption="Sub?"
           dataType="boolean"
           alignment="center"
+          calculateCellValue={(res) => (!res.sub ? false : res.sub)}
         />
         <Column
           dataField="completed"
           caption="Inv?"
           dataType="boolean"
           alignment="center"
+          calculateCellValue={(res) => (!res.inv ? false : res.inv)}
         />
       </DataGrid>
     </React.Fragment>
