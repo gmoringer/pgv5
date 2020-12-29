@@ -1,7 +1,6 @@
 import { withNavigationWatcher } from "./contexts/navigation";
 import {
   HomePage,
-  TasksPage,
   ProfilePage,
   PropertyListPage,
   JobListPage,
@@ -10,7 +9,7 @@ import {
   CreateNewAccount,
   AllUsers,
   LastWorked,
-  VendorListPage
+  VendorListPage,
 } from "./pages";
 
 const routes = [
@@ -38,7 +37,7 @@ const routes = [
     path: "/laborlog",
     component: LaborLogListPage,
   },
-    {
+  {
     path: "/vendorlist",
     component: VendorListPage,
   },

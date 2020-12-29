@@ -6,11 +6,6 @@ export const navigation = [
     path: "/home",
     icon: "home",
   },
-  // {
-  //   text: "Profile",
-  //   path: "/profile",
-  //   icon: "card",
-  // },
   {
     text: "PO Management",
     icon: "folder",
@@ -31,10 +26,10 @@ export const navigation = [
         text: "Labor Log",
         path: "/laborlog",
       },
-     {
-       text: "Vendor List",
-       path: "/vendorlist"
-       }
+      {
+        text: "Vendor List",
+        path: "/vendorlist",
+      },
     ],
   },
 ];
@@ -47,10 +42,6 @@ export const adminNavigation = {
       text: "Users",
       path: "/allusers",
     },
-    // {
-    //   text: "Last Worked",
-    //   path: "/lastworked",
-    // },
     {
       text: "Create New User",
       path: "/createuser",
