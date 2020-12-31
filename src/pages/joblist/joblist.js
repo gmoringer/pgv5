@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../contexts/auth";
+import Firebase from "firebase";
 import { states } from "../../constants";
 import DataSource from "devextreme/data/data_source";
 import { Item } from "devextreme-react/form";
@@ -16,6 +17,7 @@ import DataGrid, {
   Form,
   Button,
   Export,
+  RangeRule
 } from "devextreme-react/data-grid";
 
 import { db } from "../../firebase";
@@ -79,6 +81,10 @@ const PropertyListPage = (props) => {
     };
   }, []);
 
+  const maxDate = (res) => {
+    
+  }
+
   return (
     <React.Fragment>
       <h2 className={"content-block"}>Job List</h2>
@@ -132,6 +138,7 @@ const PropertyListPage = (props) => {
           caption="Job Nr."
           dataType="number"
           allowEditing={false}
+          defaultSortOrder="desc"
         />
         <Column dataField={"property"} caption={"Property"} hidingPriority={5}>
           <Lookup
@@ -139,23 +146,26 @@ const PropertyListPage = (props) => {
             valueExpr={"uid"}
             displayExpr={"address"}
           />
+          <RequiredRule />
         </Column>
         <Column
           dataField={"jobtitle"}
           caption={"Job Description"}
           allowSorting={false}
           hidingPriority={7}
-        />
+        >
+          <RequiredRule />
+        </Column>
         <Column
           dataField={"dateapproved"}
           caption={"Date Approved"}
           dataType="date"
           allowSorting={false}
           calculateCellValue={(res) => {
-            // console.log(res);
-            return res.dateapproved ? res.dateapproved.toDate() : "";
+            return res.dateapproved instanceof Firebase.firestore.Timestamp ? res.dateapproved.toDate() : "";
           }}
-        />
+        >
+        </Column>
         <Column
           dataField={"am"}
           caption={"AM"}
@@ -175,7 +185,7 @@ const PropertyListPage = (props) => {
           hidingPriority={3}
           dataType="number"
           format="currency"
-        />
+        ><RequiredRule /></Column>
 
         <Column
           dataField={"materialssum"}

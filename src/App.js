@@ -27,10 +27,6 @@ function App() {
 }
 
 export default function () {
-  
-  const test = () => db.collection("properties").get().then(snap => {
-    console.log(snap)
-  });
 
   const screenSizeClass = useScreenSizeClass();
 

@@ -29,7 +29,6 @@ const PoListPage = (props) => {
   const { user } = useAuth();
 
   const isPropertyManager = (e) => {
-      console.log(e.row.values[5])
     if (e.row.values[3] === user.uid || user.isAdmin) {
       return true;
     }
@@ -113,7 +112,6 @@ const PoListPage = (props) => {
         store.load();
       },
       update: async (key, value) => {
-        console.log(value);
         await db.updatePo(key, value);
         store.load();
       },
@@ -180,6 +178,7 @@ const PoListPage = (props) => {
           dataType="number"
           allowEditing={false}
           alignment="left"
+          defaultSortOrder="desc"
         />
         <Column dataField={"jobnr"} caption={"Job"} hidingPriority={5}>
           <Lookup

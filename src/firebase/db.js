@@ -11,8 +11,11 @@ export const getAllVendors = () => db.collection("vendors").get();
 export const deleteOneVendor = (key) =>
   db.collection("vendors").doc(key).delete();
 
-export const deleteOneProperty = (key) =>
-  db.collection("properties").doc(key).delete();
+export const deleteOneProperty = (key) => {
+  db.collection('properties').doc(key).update({
+    "active": false
+  })
+}
 
 export const addNewVendor = async (vendor, user) => {
   return db.collection("vendors").add({
@@ -33,6 +36,7 @@ export const addNewProperty = async (property, user) => {
     date: Firebase.firestore.Timestamp.now(),
     am: user.uid,
     propertynr: propNr,
+    active: true
   });
 };
 export const getLastProperty = () =>
@@ -57,9 +61,9 @@ export const updateOneVendor = async (key, value) =>
 
 export const getAllJobs = () => db.collection("jobs").get();
 export const deleteOneJob = (key) => db.collection("jobs").doc(key).delete();
+
 export const addNewJob = async (job, user) => {
   const lastNr = await getLastJob();
-  console.log(job);
   const jobNr =
     lastNr.docs.length === 0
       ? parseInt(process.env.REACT_APP_FIRST_JOB_NR)
@@ -115,7 +119,6 @@ export const getOnePo = async (key) => db.collection("pos").doc(key).get();
 export const updatePo = async (key, value) => {
   const poOld = await getOnePo(key);
   const poOldData = poOld.data();
-  console.log(value);
 
   const oldValue = poOldData.amount;
   const newValue = value.amount ? value.amount : poOldData.amount;
@@ -137,7 +140,6 @@ export const deleteOnePo = async (key) => {
     .doc(key)
     .delete()
     .then(() => {
-      console.log(`amount: ${amount}, jobnr: ${jobnr}`);
       updateJobPrice(-1 * amount, jobnr);
     });
 };
@@ -184,22 +186,3 @@ export const getAllUsers = () => db.collection("users").get();
 export const getPoTypes = () => {
   return db.collection("potypes").get();
 };
-
-// export const doCreateUser = (id, username, email) =>
-//   db.ref(`users/${id}`).set({
-//     username,
-//     email,
-//   });
-
-// export const onceGetUsers = () => db.ref("users").once("value");
-
-// // Chat API
-
-// export const doCreateMessage = (userId, text) =>
-//   db.ref("messages").push({
-//     userId,
-//     text,
-//   });
-
-// export const onMessageAdded = (callback) =>
-//   db.ref("messages").orderByKey().limitToLast(100).on("child_added", callback);

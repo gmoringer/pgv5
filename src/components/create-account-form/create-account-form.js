@@ -23,7 +23,6 @@ export default function (props) {
   const [isAdmin, setAdmin] = useState(false);
 
   const isAdminChanged = (e) => {
-    console.log(e.value);
   };
   const onSubmit = useCallback(
     async (e) => {

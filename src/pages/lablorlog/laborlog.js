@@ -26,7 +26,6 @@ const PoListPage = (props) => {
   const [properties, setProperties] = useState([]);
   const { user } = useAuth();
 const isPropertyManager = (e) => {
-      console.log(e.row.values[2])
     if (e.row.values[2] === user.uid || user.isAdmin) {
       return true;
     }
@@ -94,7 +93,6 @@ const isPropertyManager = (e) => {
         store.load();
       },
       update: async (key, value) => {
-        console.log(value);
         await db.updateLaborLog(key, value);
         store.load();
       },

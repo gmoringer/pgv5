@@ -27,7 +27,6 @@ export default () => {
     });
   }, []);
 
-  console.log(currentUsr);
 
   const employee = {
     ID: 7,
@@ -41,9 +40,6 @@ export default () => {
     Notes: notes,
     Address: "4600 N Virginia Rd.",
   };
-
-  // console.log(user);
-
   return (
     <React.Fragment>
       <h2 className={"content-block"}>Profile</h2>

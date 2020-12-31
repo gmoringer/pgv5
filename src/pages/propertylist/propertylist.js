@@ -23,7 +23,6 @@ import { db } from "../../firebase";
 const PropertyListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const { user } = useAuth();
-  console.log(user);
 
   useEffect(() => {
     db.getAllUsers().then((res) => {
@@ -34,7 +33,7 @@ const PropertyListPage = (props) => {
   }, []);
 
   const store = useMemo(() => {
-    return new DataSource({
+    const newStore = new DataSource({
       key: "id",
       load: async () => {
         const result = [];
@@ -46,7 +45,8 @@ const PropertyListPage = (props) => {
         return result;
       },
       remove: async (key) => {
-        await db.deleteOneProperty(key).then(store.load());
+        await db.deleteOneProperty(key)
+        store.load()
       },
       insert: async (values) => {
         await db.addNewProperty(values, user);
@@ -55,7 +55,12 @@ const PropertyListPage = (props) => {
       update: (key, value) => {
         db.updateOneProperty(key, value).then((res) => store.load());
       },
-    });
+    })
+    if (!user.isAdmin) {
+      newStore.filter('active', "=", true)
+    }
+    
+    return newStore;
   }, []);
 
   useEffect(() => {
@@ -65,7 +70,6 @@ const PropertyListPage = (props) => {
   }, []);
 
   const catchEditing = (e) => {
-    // console.log(e);
   };
 
   const isPropertyManager = (e) => {
@@ -89,6 +93,14 @@ const PropertyListPage = (props) => {
         allowColumnResizing={true}
         rowAlternationEnabled={true}
         onEditorPreparing={catchEditing}
+        onRowPrepared = {(e) => {
+          if (e.rowType == 'data' && e.data.active == false) {
+            console.log('false')
+            e.rowElement.style.backgroundColor = 'Tomato';
+            e.rowElement.style.opacity = .8
+            e.rowElement.className = e.rowElement.className.replace("dx-row-alt", "");  
+          }
+        }}
       >
         <Export enabled={true} />
         <Paging defaultPageSize={10} />
@@ -118,15 +130,13 @@ const PropertyListPage = (props) => {
             </Item>
           </Form>
         </Editing>
+          <Column dataField="active" visible={user.isAdmin}  calculateCellValue={(res) => {
+            return (res.active || res.active === undefined) ? true : false;
+          }}>
+        </Column>
         <Column type="buttons" width={110}>
           <Button name="edit" visible={isPropertyManager} />
           <Button name="delete" />
-          {/* <Button
-            hint="Clone"
-            icon="repeat"
-            visible={true}
-            // onClick={this.cloneIconClick}
-          />  */}
         </Column>
         <Column
           dataField="propertynr"
@@ -135,6 +145,7 @@ const PropertyListPage = (props) => {
           alignment="left"
           width={125}
           allowEditing={false}
+          defaultSortOrder="desc" />
         />
         <Column dataField="am" caption="AM" alignment="center" width={100}>
           <Lookup

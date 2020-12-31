@@ -24,7 +24,6 @@ export async function signIn(email, password) {
 
 export async function createAccount(value) {
   const { email, password, initials, fullname, isAdmin } = value;
-  console.log(isAdmin)
   let result = {};
 
   await auth
@@ -43,8 +42,6 @@ export async function createAccount(value) {
 export async function changePassword(email, recoveryCode) {
   try {
     // Send request
-    console.log(email, recoveryCode);
-
     return {
       isOk: true,
     };
@@ -61,7 +58,6 @@ export async function resetPassword(email) {
   await auth
     .doPasswordReset(email)
     .then((res) => {
-      console.log(res);
       result = { isOk: true };
     })
     .catch((err) => {
