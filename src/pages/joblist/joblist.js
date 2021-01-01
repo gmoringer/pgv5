@@ -51,7 +51,7 @@ const PropertyListPage = (props) => {
   }, []);
 
   const store = useMemo(() => {
-    return new DataSource({
+    const newStore = new DataSource({
       key: "uid",
       load: async () => {
         const result = [];
@@ -63,7 +63,8 @@ const PropertyListPage = (props) => {
         return result;
       },
       remove: async (key) => {
-        await db.deleteOneJob(key).then(store.load());
+        await db.deleteOneJob(key)
+        store.load();
       },
       insert: async (values) => {
         await db.addNewJob(values, user);
@@ -73,6 +74,11 @@ const PropertyListPage = (props) => {
         db.updateOneJob(key, value).then((res) => store.load());
       },
     });
+      if (!user.isAdmin) {
+      newStore.filter('active', "=", true)
+    }
+    
+    return newStore;
   }, []);
 
   useEffect(() => {
@@ -98,6 +104,13 @@ const PropertyListPage = (props) => {
         columnHidingEnabled={true}
         allowColumnResizing={true}
         rowAlternationEnabled={true}
+        onRowPrepared = {(e) => {
+          if (e.rowType == 'data' && e.data.active == false) {
+            e.rowElement.style.backgroundColor = 'Tomato';
+            e.rowElement.style.opacity = .8
+            e.rowElement.className = e.rowElement.className.replace("dx-row-alt", "");  
+          }
+        }}
       >
         <Export enabled={true} />
         <Paging defaultPageSize={10} />
@@ -128,6 +141,10 @@ const PropertyListPage = (props) => {
             </Item>
           </Form>
         </Editing>
+          <Column dataField="active" visible={user.isAdmin}  calculateCellValue={(res) => {
+            return (res.active || res.active === undefined) ? true : false;
+          }}>
+        </Column>
         <Column type="buttons" width={110}>
           <Button name="edit" visible={isPropertyManager} />
           <Button name="delete" />
@@ -162,6 +179,7 @@ const PropertyListPage = (props) => {
           dataType="date"
           allowSorting={false}
           calculateCellValue={(res) => {
+            
             return res.dateapproved instanceof Firebase.firestore.Timestamp ? res.dateapproved.toDate() : "";
           }}
         >

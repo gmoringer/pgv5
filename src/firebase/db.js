@@ -60,7 +60,12 @@ export const updateOneVendor = async (key, value) =>
 // JOB API
 
 export const getAllJobs = () => db.collection("jobs").get();
-export const deleteOneJob = (key) => db.collection("jobs").doc(key).delete();
+
+export const deleteOneJob = (key) => {
+    db.collection('jobs').doc(key).update({
+    "active": false
+  })
+  }
 
 export const addNewJob = async (job, user) => {
   const lastNr = await getLastJob();
@@ -75,6 +80,7 @@ export const addNewJob = async (job, user) => {
     am: user.uid,
     materialssum: 0,
     laborsum: 0,
+    active: true
   });
 };
 
@@ -110,6 +116,7 @@ export const addNewPo = async (po, user) => {
       date: Firebase.firestore.Timestamp.now(),
       ponr: poNr,
       am: user.uid,
+      active: true
     })
     .then((res) => updateJobPrice(parseInt(po.amount), po.jobnr));
 };

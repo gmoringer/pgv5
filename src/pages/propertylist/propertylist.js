@@ -95,11 +95,14 @@ const PropertyListPage = (props) => {
         onEditorPreparing={catchEditing}
         onRowPrepared = {(e) => {
           if (e.rowType == 'data' && e.data.active == false) {
-            console.log('false')
             e.rowElement.style.backgroundColor = 'Tomato';
             e.rowElement.style.opacity = .8
             e.rowElement.className = e.rowElement.className.replace("dx-row-alt", "");  
           }
+        }}
+        onRowInserted = {(e) => {
+          console.log('Inserted')
+          e.component.selectedRowKeys([e.key.rowIndex], true)
         }}
       >
         <Export enabled={true} />
