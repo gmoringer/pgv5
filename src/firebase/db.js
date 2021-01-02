@@ -12,10 +12,10 @@ export const deleteOneVendor = (key) =>
   db.collection("vendors").doc(key).delete();
 
 export const deleteOneProperty = (key) => {
-  db.collection('properties').doc(key).update({
-    "active": false
-  })
-}
+  db.collection("properties").doc(key).update({
+    active: false,
+  });
+};
 
 export const addNewVendor = async (vendor, user) => {
   return db.collection("vendors").add({
@@ -27,6 +27,7 @@ export const addNewVendor = async (vendor, user) => {
 
 export const addNewProperty = async (property, user) => {
   const lastNr = await getLastProperty();
+  console.log(user.uid);
   const propNr =
     lastNr.docs.length === 0
       ? parseInt(process.env.REACT_APP_FIRST_PROP_NR)
@@ -36,7 +37,7 @@ export const addNewProperty = async (property, user) => {
     date: Firebase.firestore.Timestamp.now(),
     am: user.uid,
     propertynr: propNr,
-    active: true
+    active: true,
   });
 };
 export const getLastProperty = () =>
@@ -62,10 +63,10 @@ export const updateOneVendor = async (key, value) =>
 export const getAllJobs = () => db.collection("jobs").get();
 
 export const deleteOneJob = (key) => {
-    db.collection('jobs').doc(key).update({
-    "active": false
-  })
-  }
+  db.collection("jobs").doc(key).update({
+    active: false,
+  });
+};
 
 export const addNewJob = async (job, user) => {
   const lastNr = await getLastJob();
@@ -80,7 +81,7 @@ export const addNewJob = async (job, user) => {
     am: user.uid,
     materialssum: 0,
     laborsum: 0,
-    active: true
+    active: true,
   });
 };
 
@@ -116,7 +117,7 @@ export const addNewPo = async (po, user) => {
       date: Firebase.firestore.Timestamp.now(),
       ponr: poNr,
       am: user.uid,
-      active: true
+      active: true,
     })
     .then((res) => updateJobPrice(parseInt(po.amount), po.jobnr));
 };

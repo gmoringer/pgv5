@@ -15,7 +15,8 @@ import DataGrid, {
   Position,
   Form,
   Button,
-  Export
+  Export,
+  Selection,
 } from "devextreme-react/data-grid";
 
 import { db } from "../../firebase";
@@ -45,21 +46,30 @@ const PropertyListPage = (props) => {
         return result;
       },
       remove: async (key) => {
-        await db.deleteOneProperty(key)
-        store.load()
+        console.log(key);
+        await db.deleteOneProperty(key);
+        await db.getAllJobs().then((snap) => {
+          snap.forEach((doc) => {
+            if (doc.id === key) {
+              db.updateOneJob(doc.id, { active: false });
+            }
+          });
+        });
+        store.load();
       },
       insert: async (values) => {
+        console.log("INSERT");
         await db.addNewProperty(values, user);
         store.load();
       },
       update: (key, value) => {
         db.updateOneProperty(key, value).then((res) => store.load());
       },
-    })
+    });
     if (!user.isAdmin) {
-      newStore.filter('active', "=", true)
+      newStore.filter("active", "=", true);
     }
-    
+
     return newStore;
   }, []);
 
@@ -69,8 +79,7 @@ const PropertyListPage = (props) => {
     };
   }, []);
 
-  const catchEditing = (e) => {
-  };
+  const catchEditing = (e) => {};
 
   const isPropertyManager = (e) => {
     if (e.row.values[2] === user.uid || user.isAdmin) {
@@ -93,18 +102,23 @@ const PropertyListPage = (props) => {
         allowColumnResizing={true}
         rowAlternationEnabled={true}
         onEditorPreparing={catchEditing}
-        onRowPrepared = {(e) => {
-          if (e.rowType == 'data' && e.data.active == false) {
-            e.rowElement.style.backgroundColor = 'Tomato';
-            e.rowElement.style.opacity = .8
-            e.rowElement.className = e.rowElement.className.replace("dx-row-alt", "");  
+        onRowPrepared={(e) => {
+          if (e.rowType == "data" && e.data.active == false) {
+            e.rowElement.style.backgroundColor = "Tomato";
+            e.rowElement.style.opacity = 0.8;
+            e.rowElement.className = e.rowElement.className.replace(
+              "dx-row-alt",
+              ""
+            );
           }
         }}
-        onRowInserted = {(e) => {
-          console.log('Inserted')
-          e.component.selectedRowKeys([e.key.rowIndex], true)
-        }}
+        // onRowInserted = {(e) => {
+        //   console.log('Inserted')
+        //   console.log(e)
+        //   e.component.selectRowsByIndexes([0])
+        // }}
       >
+        <Selection deferred={true} />
         <Export enabled={true} />
         <Paging defaultPageSize={10} />
         <Pager showPageSizeSelector={true} showInfo={true} />
@@ -133,13 +147,24 @@ const PropertyListPage = (props) => {
             </Item>
           </Form>
         </Editing>
-          <Column dataField="active" visible={user.isAdmin}  calculateCellValue={(res) => {
-            return (res.active || res.active === undefined) ? true : false;
-          }}>
-        </Column>
+        <Column
+          dataField="active"
+          visible={user.isAdmin}
+          calculateCellValue={(res) => {
+            return res.active || res.active === undefined ? true : false;
+          }}
+        ></Column>
         <Column type="buttons" width={110}>
-          <Button name="edit" visible={isPropertyManager} />
-          <Button name="delete" />
+          <Button
+            name="edit"
+            visible={(res) => isPropertyManager && res.row.data.active}
+          />
+          <Button
+            name="delete"
+            visible={(res) => {
+              return res.row.data.active;
+            }}
+          />
         </Column>
         <Column
           dataField="propertynr"
@@ -148,7 +173,8 @@ const PropertyListPage = (props) => {
           alignment="left"
           width={125}
           allowEditing={false}
-          defaultSortOrder="desc" />
+          defaultSortOrder="desc"
+        />
         />
         <Column dataField="am" caption="AM" alignment="center" width={100}>
           <Lookup
