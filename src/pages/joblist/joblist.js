@@ -54,10 +54,21 @@ const PropertyListPage = (props) => {
     const newStore = new DataSource({
       key: "uid",
       load: async () => {
+        
+        var props = [];
+        await db.getAllProperties().then((res) => {
+          const result = [];
+          res.forEach((doc) => props.push({ ...doc.data(), uid: doc.id }));
+          });
+        
         const result = [];
         await db.getAllJobs().then((snap) =>
-          snap.forEach((doc) => {
-            result.push({ ...doc.data(), uid: doc.id });
+          snap.forEach(async (doc) => {
+            const st = props.find(prop => {
+               return prop.uid === doc.data().property
+            })
+            const data = {...doc.data(), uid: doc.id, active: st.active}
+            result.push(data);
           })
         );
         return result;
@@ -146,8 +157,11 @@ const PropertyListPage = (props) => {
           }}>
         </Column>
         <Column type="buttons" width={110}>
-          <Button name="edit" visible={isPropertyManager} />
-          <Button name="delete" />
+          <Button name="edit" visible={e => {
+            return isPropertyManager && e.row.data.active}} />
+          <Button name="delete" visible={e => {
+            return e.row.data.active && user.isAdmin;
+          }}/>
         </Column>
         <Column
           dataField={"jobnr"}
@@ -157,9 +171,12 @@ const PropertyListPage = (props) => {
           allowEditing={false}
           defaultSortOrder="desc"
         />
-        <Column dataField={"property"} caption={"Property"} hidingPriority={5}>
+        <Column dataField={"property"} caption={"Property"}>
           <Lookup
-            dataSource={properties}
+            dataSource={() => {
+              const activeprops = properties.filter(prop=> prop.active && prop.am === user.uid)
+              return activeprops
+              }}
             valueExpr={"uid"}
             displayExpr={"address"}
           />

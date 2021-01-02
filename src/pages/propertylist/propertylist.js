@@ -48,13 +48,13 @@ const PropertyListPage = (props) => {
       remove: async (key) => {
         console.log(key);
         await db.deleteOneProperty(key);
-        await db.getAllJobs().then((snap) => {
-          snap.forEach((doc) => {
-            if (doc.id === key) {
-              db.updateOneJob(doc.id, { active: false });
-            }
-          });
-        });
+        // await db.getAllJobs().then((snap) => {
+        //   snap.forEach((doc) => {
+        //     if (doc.id === key) {
+        //       db.updateOneJob(doc.id, { active: false });
+        //     }
+        //   });
+        // });
         store.load();
       },
       insert: async (values) => {
@@ -157,12 +157,13 @@ const PropertyListPage = (props) => {
         <Column type="buttons" width={110}>
           <Button
             name="edit"
-            visible={(res) => isPropertyManager && res.row.data.active}
+            visible={(res) => {
+              return isPropertyManager(res) && res.row.data.active}}
           />
           <Button
             name="delete"
             visible={(res) => {
-              return res.row.data.active;
+              return res.row.data.active && user.isAdmin;
             }}
           />
         </Column>

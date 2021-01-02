@@ -40,8 +40,13 @@ export const addNewProperty = async (property, user) => {
     active: true,
   });
 };
+
 export const getLastProperty = () =>
   db.collection("properties").orderBy("propertynr", "desc").limit(1).get();
+
+export const getOneProperty = async (key) => {
+  await db.collection('properties').doc(key).get()
+}
 
 export const getLastVendor = () =>
   db.collection("vendor").orderBy("vendornr", "desc").limit(1).get();
@@ -80,8 +85,7 @@ export const addNewJob = async (job, user) => {
     jobnr: jobNr,
     am: user.uid,
     materialssum: 0,
-    laborsum: 0,
-    active: true,
+    laborsum: 0
   });
 };
 
