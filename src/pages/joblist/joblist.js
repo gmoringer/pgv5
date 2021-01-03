@@ -28,9 +28,10 @@ const PropertyListPage = (props) => {
   const { user } = useAuth();
 
   const isPropertyManager = (e) => {
-    if (e.row.values[5] === user.uid || user.isAdmin) {
-      return true;
-    }
+    // console.log(e)
+    // if (e.row.values[5] === user.uid || user.isAdmin) {
+    //   return true;
+    // }
     return false;
   };
 
@@ -116,6 +117,7 @@ const PropertyListPage = (props) => {
         allowColumnResizing={true}
         rowAlternationEnabled={true}
         onRowPrepared = {(e) => {
+          // console.log(e)
           if (e.rowType == 'data' && e.data.active == false) {
             e.rowElement.style.backgroundColor = 'Tomato';
             e.rowElement.style.opacity = .8
@@ -159,7 +161,7 @@ const PropertyListPage = (props) => {
         </Column>
         <Column type="buttons" width={110}>
           <Button name="edit" visible={e => {
-            return isPropertyManager && e.row.data.active}} />
+            return (e.row.data.active && e.row.data.am === user.uid) || user.isAdmin}} />
           <Button name="delete" visible={e => {
             return e.row.data.active && user.isAdmin;
           }}/>
@@ -185,10 +187,10 @@ const PropertyListPage = (props) => {
             dataSource={() => {
               // console.log(properties)
               const find = properties.filter(prop => {
-                console.log(user.uid)
+                // console.log(user.uid)
                 return (prop.active && prop.am === user.uid) || user.isAdmin 
                 })
-              console.log(find)
+              // console.log(find)
               return find}}
             valueExpr={"uid"}
             displayExpr={"address"}
