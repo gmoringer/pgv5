@@ -1,6 +1,5 @@
 import { db, firebase } from "./firebase";
 import Firebase from "firebase";
-import { AuthProvider, useAuth } from "../contexts/auth";
 
 // Property API
 
@@ -11,13 +10,13 @@ export const getAllVendors = () => db.collection("vendors").get();
 export const deleteOneVendor = (key) =>
   db.collection("vendors").doc(key).delete();
 
-export const deleteOneProperty = async (key) => {
-  await db.collection("properties").doc(key).update({
+export const deleteOneProperty = (key) => {
+  db.collection("properties").doc(key).update({
     active: false,
   });
 };
 
-export const addNewVendor = async (vendor, user) => {
+export const addNewVendor = (vendor, user) => {
   return db.collection("vendors").add({
     ...vendor,
     date: Firebase.firestore.Timestamp.now(),
@@ -27,7 +26,6 @@ export const addNewVendor = async (vendor, user) => {
 
 export const addNewProperty = async (property, user) => {
   const lastNr = await getLastProperty();
-  console.log(user.uid);
   const propNr =
     lastNr.docs.length === 0
       ? parseInt(process.env.REACT_APP_FIRST_PROP_NR)
@@ -44,21 +42,21 @@ export const addNewProperty = async (property, user) => {
 export const getLastProperty = () =>
   db.collection("properties").orderBy("propertynr", "desc").limit(1).get();
 
-export const getOneProperty = async (key) => {
-  await db.collection('properties').doc(key).get()
-}
+export const getOneProperty = (key) => {
+  db.collection("properties").doc(key).get();
+};
 
 export const getLastVendor = () =>
   db.collection("vendor").orderBy("vendornr", "desc").limit(1).get();
 
-export const updateOneProperty = async (key, value) =>
-  await db
+export const updateOneProperty = (key, value) =>
+  db
     .collection("properties")
     .doc(key)
     .update({ ...value });
 
-export const updateOneVendor = async (key, value) =>
-  await db
+export const updateOneVendor = (key, value) =>
+  db
     .collection("vendors")
     .doc(key)
     .update({ ...value });
@@ -85,12 +83,12 @@ export const addNewJob = async (job, user) => {
     jobnr: jobNr,
     am: user.uid,
     materialssum: 0,
-    laborsum: 0
+    laborsum: 0,
   });
 };
 
-export const updateOneJob = async (key, value) =>
-  await db
+export const updateOneJob = (key, value) =>
+  db
     .collection("jobs")
     .doc(key)
     .update({ ...value });
@@ -115,7 +113,8 @@ export const addNewPo = async (po, user) => {
     lastNr.docs.length === 0
       ? parseInt(process.env.REACT_APP_FIRST_PO_NR)
       : lastNr.docs[0].data().ponr + 1;
-  db.collection("pos")
+  await db
+    .collection("pos")
     .add({
       ...po,
       date: Firebase.firestore.Timestamp.now(),
@@ -137,8 +136,7 @@ export const updatePo = async (key, value) => {
   const oldJob = poOldData.jobnr;
   const newJob = value.jobnr ? value.jobnr : oldJob;
 
-  await db
-    .collection("pos")
+  db.collection("pos")
     .doc(key)
     .update({ ...value, date: Firebase.firestore.Timestamp.now() })
     .then(updateJobPrice(-oldValue, oldJob))
@@ -159,7 +157,7 @@ export const deleteOnePo = async (key) => {
 //API LABOR
 export const getAllLaborLogs = () => db.collection("labor").get();
 
-export const addNewLaborLog = async (ll, user) => {
+export const addNewLaborLog = (ll, user) => {
   db.collection("labor")
     .add({
       ...ll,

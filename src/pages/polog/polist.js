@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../contexts/auth";
 import DataSource from "devextreme/data/data_source";
 import { Item } from "devextreme-react/form";
-import Firebase from "firebase";
 import DataGrid, {
   Column,
   Pager,
@@ -15,7 +14,8 @@ import DataGrid, {
   Position,
   Form,
   Button,
-  Export
+  Export,
+  Format,
 } from "devextreme-react/data-grid";
 
 import { db } from "../../firebase";
@@ -35,16 +35,21 @@ const PoListPage = (props) => {
     return false;
   };
 
-  useEffect(async () => {
-    const potypes = await db.getPoTypes();
+  useEffect(() => {
     const result = [];
-    potypes.forEach((doc) => {
-      result.push({ ...doc.data(), uid: doc.uid });
-    });
+    async function fetchData() {
+      return await db.getPoTypes();
+    }
+
+    fetchData().then((res) =>
+      res.forEach((doc) => {
+        result.push({ ...doc.data(), uid: doc.id });
+      })
+    );
     setPoTypes(result);
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
     db.getAllVendors().then((res) => {
       const result = [];
       res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
@@ -60,28 +65,32 @@ const PoListPage = (props) => {
     });
   }, []);
 
-  useEffect(async () => {
+  useEffect(() => {
     const result = [];
-    await db.getAllProperties().then((res) => {
-      res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
-      setProperties(result);
-    });
 
-    db.getAllJobs().then((res) => {
-      const jobsDownload = [];
-      res.forEach((doc) => {
-        const currentPropNr = result.find((prop) => {
-          return prop.uid === doc.data().property;
-        });
-
-        jobsDownload.push({
-          ...doc.data(),
-          uid: doc.id,
-          propertynr: currentPropNr.propertynr,
-        });
+    async function fetchdata() {
+      return await db.getAllProperties().then((res) => {
+        res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
+        setProperties(result);
       });
-      setJobs(jobsDownload);
-    });
+    }
+    fetchdata().then(
+      db.getAllJobs().then((res) => {
+        const jobsDownload = [];
+        res.forEach((doc) => {
+          const currentPropNr = result.find((prop) => {
+            return prop.uid === doc.data().property;
+          });
+
+          jobsDownload.push({
+            ...doc.data(),
+            uid: doc.id,
+            propertynr: currentPropNr.propertynr,
+          });
+        });
+        setJobs(jobsDownload);
+      })
+    );
   }, []);
 
   useEffect(() => {
@@ -137,8 +146,18 @@ const PoListPage = (props) => {
         columnHidingEnabled={true}
         allowColumnResizing={true}
         rowAlternationEnabled={true}
+        onRowPrepared={(e) => {
+          if (e.rowType === "data" && e.data.active === false) {
+            e.rowElement.style.backgroundColor = "Tomato";
+            e.rowElement.style.opacity = 0.8;
+            e.rowElement.className = e.rowElement.className.replace(
+              "dx-row-alt",
+              ""
+            );
+          }
+        }}
       >
-      <Export enabled={true} />
+        <Export enabled={true} />
         <Paging defaultPageSize={10} />
         <Pager showPageSizeSelector={true} showInfo={true} />
         <FilterRow visible={true} />
@@ -162,15 +181,9 @@ const PoListPage = (props) => {
             </Item>
           </Form>
         </Editing>
-             <Column type="buttons" width={110}>
+        <Column type="buttons" width={110}>
           <Button name="edit" visible={isPropertyManager} />
-          <Button name="delete" />
-          {/* <Button
-            hint="Clone"
-            icon="repeat"
-            visible={true}
-            // onClick={this.cloneIconClick}
-          />  */}
+          <Button name="delete" visible={isPropertyManager || user.isAdmin} />
         </Column>
         <Column
           dataField={"ponr"}
@@ -191,6 +204,7 @@ const PoListPage = (props) => {
               return `${res.jobtitle} (${res.jobnr}) @ ${currentProp.address}`;
             }}
           />
+          <RequiredRule />
         </Column>
 
         <Column
@@ -217,53 +231,35 @@ const PoListPage = (props) => {
             return res.date ? res.date.toDate() : null;
           }}
         />
-        <Column
-          dataField={"type"}
-          caption={"Type"}
-          allowSorting={false}
-          hidingPriority={7}
-        >
+        <Column dataField={"type"} caption={"Type"} allowSorting={false}>
           <Lookup
             dataSource={potypes}
-            valueExpr={"code"}
-            displayExpr={"code"}
+            valueExpr={"uid"}
+            displayExpr={"name"}
+            disabled={true}
           />
+          <RequiredRule />
         </Column>
-        <Column
-          dataField={"amount"}
-          caption={"Amount"}
-          allowSorting={false}
-          hidingPriority={7}
-          dataType="number"
-          format="currency"
-        />
-        <Column
-          dataField={"paidby"}
-          caption={"Paid By"}
-          allowSorting={false}
-          hidingPriority={7}
-        />
-        <Column
-          dataField={"vendor"}
-          caption={"Vendor"}
-          allowSorting={false}
-          hidingPriority={7}
-        > <Lookup
+        <Column dataField={"amount"} caption={"Amount"} dataType="number">
+          <RequiredRule />
+          <Format type="currency" precision={2}></Format>
+        </Column>
+        <Column dataField={"paidby"} caption={"Paid By"} allowSorting={false}>
+          <RequiredRule />
+        </Column>
+        <Column dataField={"vendor"} caption={"Vendor"} allowSorting={false}>
+          <Lookup
             dataSource={vendors}
             valueExpr={"uid"}
             displayExpr={"name"}
-             disabled={true}
-             allowEditing={false}
+            disabled={true}
+            allowEditing={false}
           />
           <RequiredRule />
-          </Column>
-        <Column
-          dataField={"desc"}
-          caption={"Descritpion"}
-          hidingPriority={6}
-          // allowEditing={false}
-          // disabled={true}
-        />
+        </Column>
+        <Column dataField={"desc"} caption={"Descritpion"}>
+          <RequiredRule />
+        </Column>
       </DataGrid>
     </React.Fragment>
   );

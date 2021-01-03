@@ -14,24 +14,23 @@ import DataGrid, {
   Popup,
   Position,
   Form,
-  Button
+  Button,
+  Format,
 } from "devextreme-react/data-grid";
 
 import { db } from "../../firebase";
-import { getAllProperties } from "../../firebase/db";
 
 const PoListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [properties, setProperties] = useState([]);
   const { user } = useAuth();
-const isPropertyManager = (e) => {
+  const isPropertyManager = (e) => {
     if (e.row.values[2] === user.uid || user.isAdmin) {
       return true;
     }
     return false;
   };
-  
 
   useEffect(() => {
     db.getAllUsers().then((res) => {
@@ -41,27 +40,31 @@ const isPropertyManager = (e) => {
     });
   }, []);
 
-  useEffect(async () => {
+  useEffect(() => {
     const result = [];
-    await db.getAllProperties().then((res) => {
-      res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
-      setProperties(result);
-    });
-
-    db.getAllJobs().then((res) => {
-      const jobsDownload = [];
-      res.forEach((doc) => {
-        const currentPropNr = result.find((prop) => {
-          return prop.uid === doc.data().property;
-        });
-
-        jobsDownload.push({
-          ...doc.data(),
-          uid: doc.id,
-          propertynr: currentPropNr.propertynr,
-        });
+    async function getData() {
+      return await db.getAllProperties().then((res) => {
+        res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
+        setProperties(result);
       });
-      setJobs(jobsDownload);
+    }
+
+    getData().then(() => {
+      db.getAllJobs().then((res) => {
+        const jobsDownload = [];
+        res.forEach((doc) => {
+          const currentPropNr = result.find((prop) => {
+            return prop.uid === doc.data().property;
+          });
+
+          jobsDownload.push({
+            ...doc.data(),
+            uid: doc.id,
+            propertynr: currentPropNr.propertynr,
+          });
+        });
+        setJobs(jobsDownload);
+      });
     });
   }, []);
 
@@ -134,7 +137,7 @@ const isPropertyManager = (e) => {
           <Form>
             <Item itemType="group" colCount={2} colSpan={2}>
               <Item dataField="jobnr" />
-              <Item dataField="date" />
+              <Item dataField="dateworked" />
               <Item dataField="hours" />
               <Item dataField="wage" />
               <Item dataField="name" />
@@ -142,11 +145,11 @@ const isPropertyManager = (e) => {
             </Item>
           </Form>
         </Editing>
-                  <Column type="buttons" width={110}>
+        <Column type="buttons" width={110}>
           <Button name="edit" visible={isPropertyManager} />
           <Button name="delete" />
         </Column>
-        <Column dataField={"jobnr"} caption={"Job"} hidingPriority={5}>
+        <Column dataField={"jobnr"} caption={"Job"}>
           <Lookup
             dataSource={jobs}
             valueExpr={"uid"}
@@ -157,12 +160,12 @@ const isPropertyManager = (e) => {
               return `${res.jobtitle} (${res.jobnr}) @ ${currentProp.address}`;
             }}
           />
+          <RequiredRule />
         </Column>
 
         <Column
           dataField={"am"}
           caption={"AM"}
-          hidingPriority={6}
           allowEditing={false}
           disabled={true}
         >
@@ -172,26 +175,50 @@ const isPropertyManager = (e) => {
             displayExpr={"initials"}
           />
         </Column>
-
         <Column
-          dataField={"date"}
+          dataField={"dateworked"}
           caption={"Date Worked"}
-          allowSorting={false}
           dataType="date"
-          hidingPriority={7}
+          allowSorting={false}
           calculateCellValue={(res) => {
-            return res.date ? res.date.toDate() : null;
+            return res.dateworked instanceof Firebase.firestore.Timestamp
+              ? res.dateworked.toDate()
+              : res.dateworked;
+            return "1";
+            // return res.dateworked ? res.dateworked.toDate() : "";
           }}
-        />
-        <Column dataField={"name"} caption={"Name"} allowSorting={true} />
-        <Column dataField={"hours"} caption={"Hours"} allowSorting={false} />
-        <Column dataField={"wage"} caption={"Wage"} allowSorting={false} />
+        >
+          <RequiredRule />
+        </Column>
+        <Column dataField={"name"} caption={"Name"} allowSorting={true}>
+          <RequiredRule />
+        </Column>
+        <Column
+          dataField={"hours"}
+          caption={"Hours"}
+          allowSorting={false}
+          dataType="number"
+        >
+          <RequiredRule />
+          <Format precision={2}></Format>
+        </Column>
+        <Column
+          dataField={"wage"}
+          caption={"Wage"}
+          allowSorting={false}
+          dataType="number"
+        >
+          <RequiredRule />
+          <Format type="currency" precision={2}></Format>
+        </Column>
         <Column
           dataField={"cost"}
           caption={"Cost"}
           allowSorting={false}
           calculateCellValue={(res) => res.hours * res.wage * 1.25}
-        />
+        >
+          <Format type="currency" precision={2}></Format>
+        </Column>
         <Column dataField={"notes"} caption={"Notes"} allowSorting={false} />
       </DataGrid>
     </React.Fragment>
