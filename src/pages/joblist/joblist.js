@@ -13,6 +13,7 @@ import DataGrid, {
   Editing,
   RequiredRule,
   Popup,
+  Format,
   Position,
   Form,
   Button,
@@ -27,13 +28,13 @@ const PropertyListPage = (props) => {
   const [properties, setProperties] = useState([]);
   const { user } = useAuth();
 
-  const isPropertyManager = (e) => {
-    // console.log(e)
-    // if (e.row.values[5] === user.uid || user.isAdmin) {
-    //   return true;
-    // }
-    return false;
-  };
+  // const isPropertyManager = (e) => {
+  //   // console.log(e)
+  //   // if (e.row.values[5] === user.uid || user.isAdmin) {
+  //   //   return true;
+  //   // }
+  //   return false;
+  // };
 
   useEffect(() => {
     db.getAllUsers().then((res) => {
@@ -82,8 +83,9 @@ const PropertyListPage = (props) => {
         await db.addNewJob(values, user);
         store.load();
       },
-      update: (key, value) => {
-        db.updateOneJob(key, value).then((res) => store.load());
+      update: async (key, value) => {
+        await db.updateOneJob(key, value);
+        store.load()
       },
     });
       if (!user.isAdmin) {
@@ -117,7 +119,6 @@ const PropertyListPage = (props) => {
         allowColumnResizing={true}
         rowAlternationEnabled={true}
         onRowPrepared = {(e) => {
-          // console.log(e)
           if (e.rowType == 'data' && e.data.active == false) {
             e.rowElement.style.backgroundColor = 'Tomato';
             e.rowElement.style.opacity = .8
@@ -146,7 +147,7 @@ const PropertyListPage = (props) => {
           <Form>
             <Item itemType="group" colCount={2} colSpan={2}>
               <Item dataField="property" />
-              <Item dataField="propertyispm" />
+              {/* <Item dataField="propertyispm" /> */}
               <Item dataField="jobtitle" />
               <Item dataField="price" />
               <Item dataField="dateapproved" />
@@ -159,7 +160,7 @@ const PropertyListPage = (props) => {
             return (res.active || res.active === undefined) ? true : false;
           }}>
         </Column>
-        <Column type="buttons" width={110}>
+        <Column type="buttons">
           <Button name="edit" visible={e => {
             return (e.row.data.active && e.row.data.am === user.uid) || user.isAdmin}} />
           <Button name="delete" visible={e => {
@@ -168,7 +169,6 @@ const PropertyListPage = (props) => {
         </Column>
         <Column
           dataField={"jobnr"}
-          hidingPriority={2}
           caption="Job Nr."
           dataType="number"
           allowEditing={false}
@@ -182,7 +182,7 @@ const PropertyListPage = (props) => {
           />
           <RequiredRule />
         </Column>
-          <Column dataField={"propertyispm"} caption={"Property"} visible={false}>
+          {/* <Column dataField={"propertyispm"} caption={"Property"} visible={false}>
           <Lookup
             dataSource={() => {
               // console.log(properties)
@@ -196,12 +196,11 @@ const PropertyListPage = (props) => {
             displayExpr={"address"}
           />
           <RequiredRule />
-        </Column>
+        </Column> */}
         <Column
           dataField={"jobtitle"}
           caption={"Job Description"}
           allowSorting={false}
-          hidingPriority={7}
         >
           <RequiredRule />
         </Column>
@@ -211,15 +210,14 @@ const PropertyListPage = (props) => {
           dataType="date"
           allowSorting={false}
           calculateCellValue={(res) => {
-            
-            return res.dateapproved instanceof Firebase.firestore.Timestamp ? res.dateapproved.toDate() : "";
+            // return res.dateapproved instanceof Firebase.firestore.Timestamp ? res.dateapproved.toDate() : "";
+            return res.dateapproved ? res.dateapproved : ""
           }}
         >
         </Column>
         <Column
           dataField={"am"}
           caption={"AM"}
-          hidingPriority={6}
           allowEditing={false}
           disabled={true}
         >
@@ -232,42 +230,40 @@ const PropertyListPage = (props) => {
         <Column
           dataField={"price"}
           caption={"Price"}
-          hidingPriority={3}
-          dataType="number"
-          format="currency"
-        ><RequiredRule /></Column>
+        ><RequiredRule /><Format type="currency" precision={2}></Format></Column>
 
         <Column
           dataField={"materialssum"}
           caption={"Materials"}
           dataType="number"
           format="currency"
-          hidingPriority={4}
           allowEditing={false}
-        />
+        >
+        <Format type="currency" precision={2}></Format>
+        </Column>
         <Column
           dataField={"laborsum"}
           caption={"Labor"}
-          hidingPriority={1}
           allowEditing={false}
-          dataType="number"
-          format="currency"
-        />
+          // dataType="number"
+          // format="currency"
+        ><Format type="currency" precision={2}></Format></Column>
         <Column
           dataField={"profitsum"}
           caption={"Profit"}
-          hidingPriority={0}
           allowEditing={false}
-          dataType="number"
-          format="currency"
-          calculateCellValue={(res) =>
-            res.price - (res.laborsum + res.materialssum)
+          // dataType="number"
+          // format="currency"
+          calculateCellValue={(res) => {
+            
+            const price = res.price - (res.laborsum + res.materialssum)
+            return price
+            }
           }
-        />
+        ><Format type="currency" precision={2}></Format></Column>
         <Column
           dataField={"margin"}
           caption={"Margin"}
-          hidingPriority={0}
           allowEditing={false}
           format="percent"
           calculateCellValue={(res) =>
@@ -286,7 +282,7 @@ const PropertyListPage = (props) => {
           caption="Inv?"
           dataType="boolean"
           alignment="center"
-          calculateCellValue={(res) => (!res.inv ? false : res.inv)}
+          calculateCellValue={(res) => res.completed ? res.completed : false}
         />
       </DataGrid>
     </React.Fragment>

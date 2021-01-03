@@ -62,8 +62,9 @@ const PropertyListPage = (props) => {
         await db.addNewProperty(values, user);
         store.load();
       },
-      update: (key, value) => {
-        db.updateOneProperty(key, value).then((res) => store.load());
+      update: async (key, value) => {
+        await db.updateOneProperty(key, value);
+         store.load()
       },
     });
     if (!user.isAdmin) {
