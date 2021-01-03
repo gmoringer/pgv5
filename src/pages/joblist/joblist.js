@@ -72,6 +72,7 @@ const PropertyListPage = (props) => {
         store.load();
       },
       insert: async (values) => {
+        console.log(values)
         await db.addNewJob(values, user);
         store.load();
       },
@@ -184,6 +185,7 @@ const PropertyListPage = (props) => {
           dataField={"dateapproved"}
           caption={"Date Approved"}
           dataType="date"
+          format={{ year: '2-digit', month: '2-digit', day: '2-digit' }}
           allowSorting={false}
           calculateCellValue={(res) => {
             return res.dateapproved ? res.dateapproved : ""
