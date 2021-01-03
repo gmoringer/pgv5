@@ -28,14 +28,6 @@ const PropertyListPage = (props) => {
   const [properties, setProperties] = useState([]);
   const { user } = useAuth();
 
-  // const isPropertyManager = (e) => {
-  //   // console.log(e)
-  //   // if (e.row.values[5] === user.uid || user.isAdmin) {
-  //   //   return true;
-  //   // }
-  //   return false;
-  // };
-
   useEffect(() => {
     db.getAllUsers().then((res) => {
       const result = [];
@@ -147,7 +139,6 @@ const PropertyListPage = (props) => {
           <Form>
             <Item itemType="group" colCount={2} colSpan={2}>
               <Item dataField="property" />
-              {/* <Item dataField="propertyispm" /> */}
               <Item dataField="jobtitle" />
               <Item dataField="price" />
               <Item dataField="dateapproved" />
@@ -162,7 +153,7 @@ const PropertyListPage = (props) => {
         </Column>
         <Column type="buttons">
           <Button name="edit" visible={e => {
-            return (e.row.data.active && e.row.data.am === user.uid) || user.isAdmin}} />
+            return (e.row.data.active && (e.row.data.am === user.uid || user.isAdmin))}} />
           <Button name="delete" visible={e => {
             return e.row.data.active && user.isAdmin;
           }}/>
@@ -182,21 +173,6 @@ const PropertyListPage = (props) => {
           />
           <RequiredRule />
         </Column>
-          {/* <Column dataField={"propertyispm"} caption={"Property"} visible={false}>
-          <Lookup
-            dataSource={() => {
-              // console.log(properties)
-              const find = properties.filter(prop => {
-                // console.log(user.uid)
-                return (prop.active && prop.am === user.uid) || user.isAdmin 
-                })
-              // console.log(find)
-              return find}}
-            valueExpr={"uid"}
-            displayExpr={"address"}
-          />
-          <RequiredRule />
-        </Column> */}
         <Column
           dataField={"jobtitle"}
           caption={"Job Description"}
@@ -210,7 +186,6 @@ const PropertyListPage = (props) => {
           dataType="date"
           allowSorting={false}
           calculateCellValue={(res) => {
-            // return res.dateapproved instanceof Firebase.firestore.Timestamp ? res.dateapproved.toDate() : "";
             return res.dateapproved ? res.dateapproved : ""
           }}
         >

@@ -25,8 +25,8 @@ const PropertyListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const { user } = useAuth();
 
-  useEffect(() => {
-    db.getAllUsers().then((res) => {
+  useEffect(async () => {
+    await db.getAllUsers().then((res) => {
       const result = [];
       res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
       setManagers(result);
@@ -46,19 +46,10 @@ const PropertyListPage = (props) => {
         return result;
       },
       remove: async (key) => {
-        console.log(key);
         await db.deleteOneProperty(key);
-        // await db.getAllJobs().then((snap) => {
-        //   snap.forEach((doc) => {
-        //     if (doc.id === key) {
-        //       db.updateOneJob(doc.id, { active: false });
-        //     }
-        //   });
-        // });
         store.load();
       },
       insert: async (values) => {
-        console.log("INSERT");
         await db.addNewProperty(values, user);
         store.load();
       },
@@ -113,11 +104,6 @@ const PropertyListPage = (props) => {
             );
           }
         }}
-        // onRowInserted = {(e) => {
-        //   console.log('Inserted')
-        //   console.log(e)
-        //   e.component.selectRowsByIndexes([0])
-        // }}
       >
         <Selection deferred={true} />
         <Export enabled={true} />
@@ -185,7 +171,6 @@ const PropertyListPage = (props) => {
             valueExpr="uid"
             disabled={true}
           />
-          {/* <RequiredRule /> */}
         </Column>
         <Column dataField="address" caption="Address">
           <RequiredRule />

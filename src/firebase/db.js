@@ -11,8 +11,8 @@ export const getAllVendors = () => db.collection("vendors").get();
 export const deleteOneVendor = (key) =>
   db.collection("vendors").doc(key).delete();
 
-export const deleteOneProperty = (key) => {
-  db.collection("properties").doc(key).update({
+export const deleteOneProperty = async (key) => {
+  await db.collection("properties").doc(key).update({
     active: false,
   });
 };
