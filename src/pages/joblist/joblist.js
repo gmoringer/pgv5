@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../contexts/auth";
 import DataSource from "devextreme/data/data_source";
 import { Item } from "devextreme-react/form";
+import Firebase from 'firebase'
 import DataGrid, {
   Column,
   Pager,
@@ -191,10 +192,12 @@ const PropertyListPage = (props) => {
           dataField={"dateapproved"}
           caption={"Date Approved"}
           dataType="date"
-          format={{ year: "2-digit", month: "2-digit", day: "2-digit" }}
+          // format={{ year: "2-digit", month: "2-digit", day: "2-digit" }}
           allowSorting={false}
           calculateCellValue={(res) => {
-            return res.dateapproved ? res.dateapproved : "";
+            return res.dateapproved instanceof Firebase.firestore.Timestamp
+              ? res.dateapproved.toDate()
+              : res.dateapproved;
           }}
         ></Column>
         <Column
@@ -209,7 +212,7 @@ const PropertyListPage = (props) => {
             displayExpr={"initials"}
           />
         </Column>
-        <Column dataField={"price"} caption={"Price"}>
+        <Column dataField={"price"} caption={"Price"} dataType='number'>
           <RequiredRule />
           <Format type="currency" precision={2}></Format>
         </Column>

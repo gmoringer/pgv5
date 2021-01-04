@@ -197,7 +197,7 @@ const PropertyListPage = (props) => {
         </Column>
         <Column
           dataField="gatecode"
-          caption="Gate Code"
+          caption="Gate Code / Notes"
           alignment="right"
           allowFiltering={false}
           allowSorting={false}

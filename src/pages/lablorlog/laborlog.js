@@ -25,11 +25,8 @@ const PoListPage = (props) => {
   const [jobs, setJobs] = useState([]);
   const [properties, setProperties] = useState([]);
   const { user } = useAuth();
-  const isPropertyManager = (e) => {
-    if (e.row.values[2] === user.uid || user.isAdmin) {
-      return true;
-    }
-    return false;
+   const isPropertyManager = (e) => {
+    return e ? e.row.data.am === user.uid : false
   };
 
   useEffect(() => {
@@ -128,10 +125,10 @@ const PoListPage = (props) => {
         <Editing
           mode="popup"
           allowAdding={true}
-          allowDeleting={user.isAdmin}
+          allowDeleting={true}
           allowUpdating={true}
         >
-          <Popup title="New PO Entry" showTitle={true} width={700} height={350}>
+          <Popup title="New Labor Log Entry" showTitle={true} width={700} height={350}>
             <Position my="top" at="top" of={window} />
           </Popup>
           <Form>
@@ -146,8 +143,8 @@ const PoListPage = (props) => {
           </Form>
         </Editing>
         <Column type="buttons" width={110}>
-          <Button name="edit" visible={isPropertyManager} />
-          <Button name="delete" />
+          <Button name="edit" visible={(e) => isPropertyManager(e) || user.isAdmin} />
+          <Button name="delete" visible={(e) => isPropertyManager(e) || user.isAdmin}/>
         </Column>
         <Column dataField={"jobnr"} caption={"Job"}>
           <Lookup
@@ -184,8 +181,6 @@ const PoListPage = (props) => {
             return res.dateworked instanceof Firebase.firestore.Timestamp
               ? res.dateworked.toDate()
               : res.dateworked;
-            return "1";
-            // return res.dateworked ? res.dateworked.toDate() : "";
           }}
         >
           <RequiredRule />

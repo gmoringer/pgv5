@@ -29,10 +29,7 @@ const PoListPage = (props) => {
   const { user } = useAuth();
 
   const isPropertyManager = (e) => {
-    if (e.row.values[3] === user.uid || user.isAdmin) {
-      return true;
-    }
-    return false;
+    return e ? e.row.data.am === user.uid : false
   };
 
   useEffect(() => {
@@ -122,7 +119,7 @@ const PoListPage = (props) => {
       },
       update: async (key, value) => {
         await db.updatePo(key, value);
-        store.load();
+        store.load()
       },
     });
   }, []);
@@ -164,7 +161,7 @@ const PoListPage = (props) => {
         <Editing
           mode="popup"
           allowAdding={true}
-          allowDeleting={user.isAdmin}
+          allowDeleting={true}
           allowUpdating={true}
         >
           <Popup title="New PO Entry" showTitle={true} width={700} height={350}>
@@ -182,8 +179,8 @@ const PoListPage = (props) => {
           </Form>
         </Editing>
         <Column type="buttons" width={110}>
-          <Button name="edit" visible={isPropertyManager} />
-          <Button name="delete" visible={isPropertyManager || user.isAdmin} />
+          <Button name="edit" visible={(e) => isPropertyManager(e)} />
+          <Button name="delete" visible={(e) => isPropertyManager(e) || user.isAdmin} />
         </Column>
         <Column
           dataField={"ponr"}
@@ -257,7 +254,7 @@ const PoListPage = (props) => {
           />
           <RequiredRule />
         </Column>
-        <Column dataField={"desc"} caption={"Descritpion"}>
+        <Column dataField={"desc"} caption={"Description"}>
           <RequiredRule />
         </Column>
       </DataGrid>
