@@ -25,12 +25,15 @@ const PropertyListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const { user } = useAuth();
 
-  useEffect(async () => {
+  useEffect(() => {
+    async function getData() {
     await db.getAllUsers().then((res) => {
       const result = [];
       res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
       setManagers(result);
     });
+    }
+    getData();
   }, []);
 
   const store = useMemo(() => {
@@ -40,8 +43,9 @@ const PropertyListPage = (props) => {
         const result = [];
         await db
           .getAllProperties()
-          .then((snap) =>
+          .then((snap) => {
             snap.forEach((doc) => result.push({ ...doc.data(), id: doc.id }))
+          }
           );
         return result;
       },
@@ -55,13 +59,13 @@ const PropertyListPage = (props) => {
       },
       update: async (key, value) => {
         await db.updateOneProperty(key, value);
-         store.load()
+        store.load()
       },
     });
     if (!user.isAdmin) {
+      console.log(newStore)
       newStore.filter("active", "=", true);
     }
-
     return newStore;
   }, []);
 
@@ -71,13 +75,8 @@ const PropertyListPage = (props) => {
     };
   }, []);
 
-  const catchEditing = (e) => {};
-
   const isPropertyManager = (e) => {
-    if (e.row.values[2] === user.uid || user.isAdmin) {
-      return true;
-    }
-    return false;
+    return e ? e.row.data.am === user.uid : false
   };
 
   return (
@@ -90,14 +89,13 @@ const PropertyListPage = (props) => {
         focusedRowEnabled={true}
         defaultFocusedRowIndex={0}
         columnAutoWidth={true}
-        columnHidingEnabled={true}
+        // columnHidingEnabled={true}
         allowColumnResizing={true}
         rowAlternationEnabled={true}
-        onEditorPreparing={catchEditing}
         onRowPrepared={(e) => {
           if (e.rowType == "data" && e.data.active == false) {
             e.rowElement.style.backgroundColor = "Tomato";
-            e.rowElement.style.opacity = 0.8;
+            e.rowElement.style.opacity = 0.75;
             e.rowElement.className = e.rowElement.className.replace(
               "dx-row-alt",
               ""
@@ -105,9 +103,9 @@ const PropertyListPage = (props) => {
           }
         }}
       >
-        <Selection deferred={true} />
+        {/* <Selection deferred={true} /> */}
         <Export enabled={true} />
-        <Paging defaultPageSize={10} />
+        <Paging defaultPageSize={25} />
         <Pager showPageSizeSelector={true} showInfo={true} />
         <FilterRow visible={true} />
         <Editing
@@ -141,7 +139,7 @@ const PropertyListPage = (props) => {
             return res.active || res.active === undefined ? true : false;
           }}
         ></Column>
-        <Column type="buttons" width={110}>
+        <Column type="buttons">
           <Button
             name="edit"
             visible={(res) => {
@@ -158,8 +156,7 @@ const PropertyListPage = (props) => {
           dataField="propertynr"
           caption="Property Nr."
           dataType="number"
-          alignment="left"
-          width={125}
+          alignment="center"
           allowEditing={false}
           defaultSortOrder="desc"
         />
@@ -172,13 +169,13 @@ const PropertyListPage = (props) => {
             disabled={true}
           />
         </Column>
-        <Column dataField="address" caption="Address">
+        <Column dataField="address" caption="Address" alignment="left">
           <RequiredRule />
         </Column>
-        <Column dataField="city" caption="City">
+        <Column dataField="city" caption="City" alignment="center">
           <RequiredRule />
         </Column>
-        <Column dataField="zip" caption="Zip" alignment="center">
+        <Column dataField="zip" caption="Zip" alignment="center" alignment="center">
           <RequiredRule />
         </Column>
         <Column
@@ -186,6 +183,7 @@ const PropertyListPage = (props) => {
           caption="State"
           allowFiltering={true}
           allowSorting={false}
+          alignment="center"
         >
           <Lookup
             dataSource={states}
@@ -198,7 +196,7 @@ const PropertyListPage = (props) => {
         <Column
           dataField="gatecode"
           caption="Gate Code / Notes"
-          alignment="right"
+          alignment="center"
           allowFiltering={false}
           allowSorting={false}
         />

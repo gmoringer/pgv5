@@ -23,9 +23,14 @@ import { db } from "../../firebase";
 const PoListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const [jobs, setJobs] = useState([]);
+
+  const [jobsManaged, setJobsManaged] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [properties, setProperties] = useState([]);
   const [potypes, setPoTypes] = useState();
+  const [propertyManaged, setPropertiesManaged] = useState([]);
+  const [formOpen, setFormOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false)
   const { user } = useAuth();
 
   const isPropertyManager = (e) => {
@@ -86,6 +91,16 @@ const PoListPage = (props) => {
           });
         });
         setJobs(jobsDownload);
+        console.log(jobsDownload)
+
+        const jobsManaged = jobsDownload.filter(job => {
+          const currentProp = result.find(prop => {
+            return job.property === prop.uid
+            })
+            
+          return (job.am === user.uid ) 
+        })
+        setJobsManaged(jobsManaged)
       })
     );
   }, []);
@@ -95,11 +110,16 @@ const PoListPage = (props) => {
       const result = [];
       res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
       setProperties(result);
+
+      const propertyManaged = result.filter(property => {
+        return (property.am === user.uid) && property.active
+      })
+      setPropertiesManaged(propertyManaged);
     });
   }, []);
 
   const store = useMemo(() => {
-    return new DataSource({
+    const newStore = new DataSource({
       key: "uid",
       load: async () => {
         const result = [];
@@ -115,13 +135,23 @@ const PoListPage = (props) => {
       },
       insert: async (values) => {
         await db.addNewPo(values, user);
+        setIsEditing(false)
+        setFormOpen(false)
         store.load();
       },
       update: async (key, value) => {
         await db.updatePo(key, value);
+        setFormOpen(false)
+        setIsEditing(false)
         store.load()
       },
     });
+
+    if (!user.isAdmin) {
+      newStore.filter("active", "=", true);
+    }
+
+    return newStore;
   }, []);
 
   useEffect(() => {
@@ -143,6 +173,10 @@ const PoListPage = (props) => {
         columnHidingEnabled={true}
         allowColumnResizing={true}
         rowAlternationEnabled={true}
+        onEditingStart={()=> {
+          setIsEditing(true)}}
+        onDisposing={()=> {
+          setIsEditing(false)}}
         onRowPrepared={(e) => {
           if (e.rowType === "data" && e.data.active === false) {
             e.rowElement.style.backgroundColor = "Tomato";
@@ -164,8 +198,17 @@ const PoListPage = (props) => {
           allowDeleting={true}
           allowUpdating={true}
         >
-          <Popup title="New PO Entry" showTitle={true} width={700} height={350}>
-            <Position my="top" at="top" of={window} />
+          <Popup 
+            title="New PO Entry" 
+            showTitle={true} 
+            width={700} 
+            height={350} 
+            onShowing={(e)=> {
+              setFormOpen(true)}}
+            onHiding={(e) => {
+              setIsEditing(false)
+              setFormOpen(false)}}>
+          <Position my="top" at="top" of={window} />
           </Popup>
           <Form>
             <Item itemType="group" colCount={2} colSpan={2}>
@@ -178,6 +221,13 @@ const PoListPage = (props) => {
             </Item>
           </Form>
         </Editing>
+        <Column
+          dataField="active"
+          visible={user.isAdmin}
+          calculateCellValue={(res) => {
+            return res.active || res.active === undefined ? true : false;
+          }}
+        ></Column>
         <Column type="buttons" width={110}>
           <Button name="edit" visible={(e) => isPropertyManager(e)} />
           <Button name="delete" visible={(e) => isPropertyManager(e) || user.isAdmin} />
@@ -190,9 +240,11 @@ const PoListPage = (props) => {
           alignment="left"
           defaultSortOrder="desc"
         />
-        <Column dataField={"jobnr"} caption={"Job"} hidingPriority={5}>
+        <Column dataField={"jobnr"} caption={"Job"} allowEditing={!isEditing}>
           <Lookup
-            dataSource={jobs}
+            dataSource={() => {
+              return formOpen ? jobsManaged : jobs
+            }}
             valueExpr={"uid"}
             displayExpr={(res) => {
               const currentProp = properties.find((property) => {
@@ -207,7 +259,6 @@ const PoListPage = (props) => {
         <Column
           dataField={"am"}
           caption={"AM"}
-          hidingPriority={6}
           allowEditing={false}
           disabled={true}
         >
@@ -223,7 +274,6 @@ const PoListPage = (props) => {
           caption={"Last Updated"}
           allowSorting={false}
           dataType="date"
-          hidingPriority={7}
           calculateCellValue={(res) => {
             return res.date ? res.date.toDate() : null;
           }}

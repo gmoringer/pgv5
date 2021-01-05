@@ -202,11 +202,11 @@ export const addNewLaborLog = (ll, user) => {
   })
 };
 
-export const updateLaborPrice = (value, job) => {
-  const amount = parseInt(value);
-  const increment = firebase.firestore.FieldValue.increment(amount);
-  db.collection("jobs").doc(job).update({ laborsum: increment });
-};
+// export const updateLaborPrice = (value, job) => {
+//   const amount = parseInt(value);
+//   const increment = firebase.firestore.FieldValue.increment(amount);
+//   db.collection("jobs").doc(job).update({ laborsum: increment });
+// };
 
 export const doCreateUser = (id, initials, fullname, email, isAdmin) => {
   return db.collection("users").doc(id).set({

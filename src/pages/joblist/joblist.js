@@ -17,6 +17,7 @@ import DataGrid, {
   Form,
   Button,
   Export,
+  SelectBox
 } from "devextreme-react/data-grid";
 
 import { db } from "../../firebase";
@@ -24,6 +25,9 @@ import { db } from "../../firebase";
 const PropertyListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const [properties, setProperties] = useState([]);
+  const [propertyManaged, setPropertiesManaged] = useState([]);
+  const [formOpen, setFormOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false)
   const { user } = useAuth();
 
   useEffect(() => {
@@ -39,6 +43,11 @@ const PropertyListPage = (props) => {
       const result = [];
       res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
       setProperties(result);
+      
+      const propertyManaged = result.filter(property => {
+        return (property.am === user.uid) && property.active
+      })
+      setPropertiesManaged(propertyManaged);
     });
   }, []);
 
@@ -69,17 +78,20 @@ const PropertyListPage = (props) => {
       },
       insert: async (values) => {
         await db.addNewJob(values, user);
+        setIsEditing(false)
+        setFormOpen(false)
         store.load();
       },
       update: async (key, value) => {
         await db.updateOneJob(key, value);
+        setIsEditing(false)
+        setFormOpen(false)
         store.load();
       },
     });
     if (!user.isAdmin) {
       newStore.filter("active", "=", true);
     }
-
     return newStore;
   }, []);
 
@@ -88,6 +100,10 @@ const PropertyListPage = (props) => {
       store.dispose();
     };
   }, []);
+
+  const changeEditingStatus = () => {
+    setIsEditing(!isEditing)
+  }
 
   return (
     <React.Fragment>
@@ -102,6 +118,10 @@ const PropertyListPage = (props) => {
         columnHidingEnabled={true}
         allowColumnResizing={true}
         rowAlternationEnabled={true}
+        onEditingStart={()=> {
+          setIsEditing(true)}}
+        onDisposing={()=> {
+          setIsEditing(false)}}
         onRowPrepared={(e) => {
           if (e.rowType === "data" && e.data.active === false) {
             e.rowElement.style.backgroundColor = "Tomato";
@@ -123,7 +143,12 @@ const PropertyListPage = (props) => {
           allowDeleting={user.isAdmin}
           allowUpdating={true}
         >
-          <Popup
+          <Popup 
+            onShowing={(e)=> {
+              setFormOpen(true)}}
+            onHiding={(e) => {
+              setIsEditing(false)
+              setFormOpen(false)}}
             title="New Job Entry"
             showTitle={true}
             width={700}
@@ -173,9 +198,10 @@ const PropertyListPage = (props) => {
           allowEditing={false}
           defaultSortOrder="desc"
         />
-        <Column dataField={"property"} caption={"Property"}>
+        <Column dataField={"property"} caption={"Property"} allowEditing={!isEditing}>
           <Lookup
-            dataSource={properties}
+            dataSource={() => {
+              return formOpen ? propertyManaged : properties}}
             valueExpr={"uid"}
             displayExpr={"address"}
           />
@@ -192,7 +218,6 @@ const PropertyListPage = (props) => {
           dataField={"dateapproved"}
           caption={"Date Approved"}
           dataType="date"
-          // format={{ year: "2-digit", month: "2-digit", day: "2-digit" }}
           allowSorting={false}
           calculateCellValue={(res) => {
             return res.dateapproved instanceof Firebase.firestore.Timestamp
