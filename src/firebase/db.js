@@ -1,14 +1,15 @@
 import { db, firebase } from "./firebase";
 import Firebase from "firebase";
 
-// Property API
-
-export const getAllProperties = () => db.collection("properties").get();
-
+//Misc API
 export const getAllVendors = () => db.collection("vendors").get();
 
 export const deleteOneVendor = (key) =>
   db.collection("vendors").doc(key).delete();
+
+// Property API
+
+export const getAllProperties = () => db.collection("properties").get();
 
 export const deleteOneProperty = (key) => {
   db.collection("properties").doc(key).update({
@@ -120,58 +121,71 @@ export const addNewPo = async (po, user) => {
       date: Firebase.firestore.Timestamp.now(),
       ponr: poNr,
       am: user.uid,
-      active: true,
     })
-    .then((res) => updateJobPrice(parseInt(po.amount), po.jobnr));
+    .then((res) => {
+      console.log(po);
+      const increment = firebase.firestore.FieldValue.increment(po.amount);
+      db.collection("jobs").doc(po.jobnr).update({ materialssum: increment });
+    });
 };
 
 export const getOnePo = async (key) => db.collection("pos").doc(key).get();
 
-export const updatePo =  (key, value) => {
-
-  async function getData(){
+export const updatePo = (key, value) => {
+  async function getData() {
     return await getOnePo(key);
   }
 
-  return getData().then(async poOld => {
+  return getData().then(async (poOld) => {
     const poOldData = poOld.data();
     const oldValue = poOldData.amount;
     const newValue = value.amount;
 
     const delta = newValue - oldValue;
 
-    return await db.collection("pos").doc(key).update({...value, date: Firebase.firestore.Timestamp.now()})
-    .then(async ()=> {
-      const increment = firebase.firestore.FieldValue.increment(delta);
-      await db.collection("jobs").doc(poOldData.jobnr).update({ materialssum: increment });
-    })
-  })
+    return await db
+      .collection("pos")
+      .doc(key)
+      .update({ ...value, date: Firebase.firestore.Timestamp.now() })
+      .then(async () => {
+        if (typeof value.amount === "number") {
+          const increment = firebase.firestore.FieldValue.increment(delta);
+          await db
+            .collection("jobs")
+            .doc(poOldData.jobnr)
+            .update({ materialssum: increment });
+        }
+      });
+  });
 };
 
-export const getOneLl = async (key) => await db.collection('labor').doc(key).get();
+export const getOneLl = async (key) =>
+  await db.collection("labor").doc(key).get();
 
 export const updateLaborLog = async (key, value) => {
-  const llOld = await getOneLl(key)
+  const llOld = await getOneLl(key);
   const llOldData = llOld.data();
 
-  console.log(llOldData)
+  console.log(llOldData);
 
-  const prevValue = llOldData.hours * llOldData.wage * 1.25
-  const updatedData = {... llOldData, ...value}
-  const updatedValue = updatedData.hours * updatedData.wage * 1.25
-  const delta = -prevValue + updatedValue
-
+  const prevValue = llOldData.hours * llOldData.wage * 1.25;
+  const updatedData = { ...llOldData, ...value };
+  const updatedValue = updatedData.hours * updatedData.wage * 1.25;
+  const delta = -prevValue + updatedValue;
   const amount = parseInt(delta);
-  console.log(amount)
+  console.log(amount);
   const increment = firebase.firestore.FieldValue.increment(delta);
   db.collection("jobs").doc(llOldData.jobnr).update({ laborsum: increment });
-  db.collection("labor").doc(key).update({...value, date: Firebase.firestore.Timestamp.now() })
+  db.collection("labor")
+    .doc(key)
+    .update({ ...value, date: Firebase.firestore.Timestamp.now() });
 };
 
 export const deleteOnePo = async (key) => {
   const poToDelete = await getOnePo(key);
   const { amount, jobnr } = poToDelete.data();
-  await db.collection("pos")
+  await db
+    .collection("pos")
     .doc(key)
     .delete()
     .then(() => {
@@ -182,12 +196,15 @@ export const deleteOnePo = async (key) => {
 export const deleteOneLaborLog = async (key) => {
   const llToDelete = await getOneLl(key);
   const { wage, hours, jobnr } = llToDelete.data();
-  await db.collection("labor")
+  await db
+    .collection("labor")
     .doc(key)
     .delete()
     .then(() => {
-    const increment = firebase.firestore.FieldValue.increment(-(wage*hours*1.25));
-    db.collection("jobs").doc(jobnr).update({ laborsum: increment });
+      const increment = firebase.firestore.FieldValue.increment(
+        -(wage * hours * 1.25)
+      );
+      db.collection("jobs").doc(jobnr).update({ laborsum: increment });
     });
 };
 
@@ -195,11 +212,14 @@ export const deleteOneLaborLog = async (key) => {
 export const getAllLaborLogs = () => db.collection("labor").get();
 
 export const addNewLaborLog = (ll, user) => {
-
-  db.collection('labor').add({...ll, am: user.uid}).then(res => {
-    const increment = firebase.firestore.FieldValue.increment((ll.wage*ll.hours*1.25));
-    db.collection("jobs").doc(ll.jobnr).update({ laborsum: increment });
-  })
+  db.collection("labor")
+    .add({ ...ll, am: user.uid })
+    .then((res) => {
+      const increment = firebase.firestore.FieldValue.increment(
+        ll.wage * ll.hours * 1.25
+      );
+      db.collection("jobs").doc(ll.jobnr).update({ laborsum: increment });
+    });
 };
 
 // export const updateLaborPrice = (value, job) => {

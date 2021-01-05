@@ -1,24 +1,22 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { useAuth } from "../../contexts/auth";
-import { states } from "../../constants";
-import DataSource from "devextreme/data/data_source";
-import { Item } from "devextreme-react/form";
 import DataGrid, {
+  Button,
   Column,
+  Editing,
+  Export,
+  FilterRow,
+  Form,
+  Lookup,
   Pager,
   Paging,
-  FilterRow,
-  Lookup,
-  Editing,
-  RequiredRule,
   Popup,
   Position,
-  Form,
-  Button,
-  Export,
-  Selection,
+  RequiredRule,
 } from "devextreme-react/data-grid";
-
+import { Item } from "devextreme-react/form";
+import DataSource from "devextreme/data/data_source";
+import React, { useEffect, useMemo, useState } from "react";
+import { states } from "../../constants";
+import { useAuth } from "../../contexts/auth";
 import { db } from "../../firebase";
 
 const PropertyListPage = (props) => {
@@ -27,11 +25,11 @@ const PropertyListPage = (props) => {
 
   useEffect(() => {
     async function getData() {
-    await db.getAllUsers().then((res) => {
-      const result = [];
-      res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
-      setManagers(result);
-    });
+      await db.getAllUsers().then((res) => {
+        const result = [];
+        res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
+        setManagers(result);
+      });
     }
     getData();
   }, []);
@@ -41,12 +39,9 @@ const PropertyListPage = (props) => {
       key: "id",
       load: async () => {
         const result = [];
-        await db
-          .getAllProperties()
-          .then((snap) => {
-            snap.forEach((doc) => result.push({ ...doc.data(), id: doc.id }))
-          }
-          );
+        await db.getAllProperties().then((snap) => {
+          snap.forEach((doc) => result.push({ ...doc.data(), id: doc.id }));
+        });
         return result;
       },
       remove: async (key) => {
@@ -59,11 +54,10 @@ const PropertyListPage = (props) => {
       },
       update: async (key, value) => {
         await db.updateOneProperty(key, value);
-        store.load()
+        store.load();
       },
     });
     if (!user.isAdmin) {
-      console.log(newStore)
       newStore.filter("active", "=", true);
     }
     return newStore;
@@ -76,7 +70,7 @@ const PropertyListPage = (props) => {
   }, []);
 
   const isPropertyManager = (e) => {
-    return e ? e.row.data.am === user.uid : false
+    return e ? e.row.data.am === user.uid : false;
   };
 
   return (
@@ -143,7 +137,8 @@ const PropertyListPage = (props) => {
           <Button
             name="edit"
             visible={(res) => {
-              return isPropertyManager(res) && res.row.data.active}}
+              return isPropertyManager(res) && res.row.data.active;
+            }}
           />
           <Button
             name="delete"
@@ -160,7 +155,6 @@ const PropertyListPage = (props) => {
           allowEditing={false}
           defaultSortOrder="desc"
         />
-        />
         <Column dataField="am" caption="AM" alignment="center" width={100}>
           <Lookup
             dataSource={managers}
@@ -175,7 +169,12 @@ const PropertyListPage = (props) => {
         <Column dataField="city" caption="City" alignment="center">
           <RequiredRule />
         </Column>
-        <Column dataField="zip" caption="Zip" alignment="center" alignment="center">
+        <Column
+          dataField="zip"
+          caption="Zip"
+          alignment="center"
+          alignment="center"
+        >
           <RequiredRule />
         </Column>
         <Column

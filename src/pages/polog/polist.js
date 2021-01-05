@@ -28,13 +28,12 @@ const PoListPage = (props) => {
   const [vendors, setVendors] = useState([]);
   const [properties, setProperties] = useState([]);
   const [potypes, setPoTypes] = useState();
-  const [propertyManaged, setPropertiesManaged] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuth();
 
   const isPropertyManager = (e) => {
-    return e ? e.row.data.am === user.uid : false
+    return e ? e.row.data.am === user.uid : false;
   };
 
   useEffect(() => {
@@ -91,16 +90,15 @@ const PoListPage = (props) => {
           });
         });
         setJobs(jobsDownload);
-        console.log(jobsDownload)
 
-        const jobsManaged = jobsDownload.filter(job => {
-          const currentProp = result.find(prop => {
-            return job.property === prop.uid
-            })
-            
-          return (job.am === user.uid ) 
-        })
-        setJobsManaged(jobsManaged)
+        const jobsManaged = jobsDownload.filter((job) => {
+          const currentProp = result.find((prop) => {
+            return job.property === prop.uid;
+          });
+
+          return job.am === user.uid && currentProp.active;
+        });
+        setJobsManaged(jobsManaged);
       })
     );
   }, []);
@@ -110,11 +108,6 @@ const PoListPage = (props) => {
       const result = [];
       res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
       setProperties(result);
-
-      const propertyManaged = result.filter(property => {
-        return (property.am === user.uid) && property.active
-      })
-      setPropertiesManaged(propertyManaged);
     });
   }, []);
 
@@ -135,15 +128,15 @@ const PoListPage = (props) => {
       },
       insert: async (values) => {
         await db.addNewPo(values, user);
-        setIsEditing(false)
-        setFormOpen(false)
+        setIsEditing(false);
+        setFormOpen(false);
         store.load();
       },
       update: async (key, value) => {
         await db.updatePo(key, value);
-        setFormOpen(false)
-        setIsEditing(false)
-        store.load()
+        setFormOpen(false);
+        setIsEditing(false);
+        store.load();
       },
     });
 
@@ -173,10 +166,12 @@ const PoListPage = (props) => {
         columnHidingEnabled={true}
         allowColumnResizing={true}
         rowAlternationEnabled={true}
-        onEditingStart={()=> {
-          setIsEditing(true)}}
-        onDisposing={()=> {
-          setIsEditing(false)}}
+        onEditingStart={() => {
+          setIsEditing(true);
+        }}
+        onDisposing={() => {
+          setIsEditing(false);
+        }}
         onRowPrepared={(e) => {
           if (e.rowType === "data" && e.data.active === false) {
             e.rowElement.style.backgroundColor = "Tomato";
@@ -198,17 +193,20 @@ const PoListPage = (props) => {
           allowDeleting={true}
           allowUpdating={true}
         >
-          <Popup 
-            title="New PO Entry" 
-            showTitle={true} 
-            width={700} 
-            height={350} 
-            onShowing={(e)=> {
-              setFormOpen(true)}}
+          <Popup
+            title="New PO Entry"
+            showTitle={true}
+            width={700}
+            height={350}
+            onShowing={(e) => {
+              setFormOpen(true);
+            }}
             onHiding={(e) => {
-              setIsEditing(false)
-              setFormOpen(false)}}>
-          <Position my="top" at="top" of={window} />
+              setIsEditing(false);
+              setFormOpen(false);
+            }}
+          >
+            <Position my="top" at="top" of={window} />
           </Popup>
           <Form>
             <Item itemType="group" colCount={2} colSpan={2}>
@@ -230,7 +228,10 @@ const PoListPage = (props) => {
         ></Column>
         <Column type="buttons" width={110}>
           <Button name="edit" visible={(e) => isPropertyManager(e)} />
-          <Button name="delete" visible={(e) => isPropertyManager(e) || user.isAdmin} />
+          <Button
+            name="delete"
+            visible={(e) => isPropertyManager(e) || user.isAdmin}
+          />
         </Column>
         <Column
           dataField={"ponr"}
@@ -243,7 +244,7 @@ const PoListPage = (props) => {
         <Column dataField={"jobnr"} caption={"Job"} allowEditing={!isEditing}>
           <Lookup
             dataSource={() => {
-              return formOpen ? jobsManaged : jobs
+              return formOpen ? jobsManaged : jobs;
             }}
             valueExpr={"uid"}
             displayExpr={(res) => {
