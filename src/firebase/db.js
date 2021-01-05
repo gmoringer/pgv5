@@ -166,19 +166,21 @@ export const updateLaborLog = async (key, value) => {
   const llOld = await getOneLl(key);
   const llOldData = llOld.data();
 
-  console.log(llOldData);
-
-  const prevValue = llOldData.hours * llOldData.wage * 1.25;
+  const prevValue = (llOldData.hours * llOldData.wage * 1.25).toFixed(2);
   const updatedData = { ...llOldData, ...value };
-  const updatedValue = updatedData.hours * updatedData.wage * 1.25;
-  const delta = -prevValue + updatedValue;
-  const amount = parseInt(delta);
-  console.log(amount);
-  const increment = firebase.firestore.FieldValue.increment(delta);
-  db.collection("jobs").doc(llOldData.jobnr).update({ laborsum: increment });
-  db.collection("labor")
-    .doc(key)
-    .update({ ...value, date: Firebase.firestore.Timestamp.now() });
+
+  const updatedValue = +(updatedData.hours * updatedData.wage * 1.25).toFixed(2);
+
+  if (typeof updatedValue === "number") {
+    const delta = -prevValue + updatedValue;
+    const amount = parseInt(delta);
+    console.log(amount);
+    const increment = firebase.firestore.FieldValue.increment(delta);
+    db.collection("jobs").doc(llOldData.jobnr).update({ laborsum: increment });
+    db.collection("labor")
+      .doc(key)
+      .update({ ...value, date: Firebase.firestore.Timestamp.now() });
+  }
 };
 
 export const deleteOnePo = async (key) => {
@@ -202,7 +204,7 @@ export const deleteOneLaborLog = async (key) => {
     .delete()
     .then(() => {
       const increment = firebase.firestore.FieldValue.increment(
-        -(wage * hours * 1.25)
+        -(wage * hours * 1.25).toFixed(2)
       );
       db.collection("jobs").doc(jobnr).update({ laborsum: increment });
     });
@@ -215,8 +217,11 @@ export const addNewLaborLog = (ll, user) => {
   db.collection("labor")
     .add({ ...ll, am: user.uid })
     .then((res) => {
+      const sum =+(ll.wage * ll.hours * 1.25).toFixed(2)
+      console.log(typeof sum)
+      console.log(sum)
       const increment = firebase.firestore.FieldValue.increment(
-        ll.wage * ll.hours * 1.25
+        +(ll.wage * ll.hours * 1.25).toFixed(2)
       );
       db.collection("jobs").doc(ll.jobnr).update({ laborsum: increment });
     });
