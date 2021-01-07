@@ -32,11 +32,17 @@ const PoListPage = (props) => {
   const [formOpen, setFormOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   const isPropertyManager = (e) => {
     return e ? e.row.data.am === user.uid : false;
   };
+
+  useEffect(() => {
+    if (!user) {
+      signOut();
+    }
+  }, []);
 
   useEffect(() => {
     db.getAllUsers().then((res) => {
@@ -63,11 +69,15 @@ const PoListPage = (props) => {
             return prop.uid === doc.data().property;
           });
 
+          if (currentPropNr) {
+
           jobsDownload.push({
             ...doc.data(),
             uid: doc.id,
             propertynr: currentPropNr.propertynr,
           });
+          }
+
         });
         setJobs(jobsDownload);
 

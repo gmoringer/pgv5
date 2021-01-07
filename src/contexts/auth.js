@@ -30,7 +30,12 @@ function AuthProvider(props) {
     if (result.isOk) {
       await db.getOneUser(result.data.uid).then((user) => {
         const isAdmin = user.data().isAdmin ? true : false;
-        const newUser = { ...user.data(), isAdmin: isAdmin };
+        console.log(result);
+        const newUser = {
+          ...user.data(),
+          isAdmin: isAdmin,
+          uid: result.data.uid,
+        };
         setUser(newUser);
       });
     }

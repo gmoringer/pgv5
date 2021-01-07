@@ -1,6 +1,10 @@
 import { db, firebase } from "./firebase";
 import Firebase from "firebase";
 
+import { useAuth } from "../api/auth.js";
+
+// const { user } = useAuth();
+
 //Misc API
 export const getAllVendors = () => db.collection("vendors").get();
 
@@ -26,6 +30,8 @@ export const addNewVendor = (vendor, user) => {
 };
 
 export const addNewProperty = async (property, user) => {
+  console.log("ADDNEWPROP");
+  console.log(user);
   const lastNr = await getLastProperty();
   const propNr =
     lastNr.docs.length === 0
@@ -169,7 +175,9 @@ export const updateLaborLog = async (key, value) => {
   const prevValue = (llOldData.hours * llOldData.wage * 1.25).toFixed(2);
   const updatedData = { ...llOldData, ...value };
 
-  const updatedValue = +(updatedData.hours * updatedData.wage * 1.25).toFixed(2);
+  const updatedValue = +(updatedData.hours * updatedData.wage * 1.25).toFixed(
+    2
+  );
 
   if (typeof updatedValue === "number") {
     const delta = -prevValue + updatedValue;
@@ -217,9 +225,9 @@ export const addNewLaborLog = (ll, user) => {
   db.collection("labor")
     .add({ ...ll, am: user.uid })
     .then((res) => {
-      const sum =+(ll.wage * ll.hours * 1.25).toFixed(2)
-      console.log(typeof sum)
-      console.log(sum)
+      const sum = +(ll.wage * ll.hours * 1.25).toFixed(2);
+      console.log(typeof sum);
+      console.log(sum);
       const increment = firebase.firestore.FieldValue.increment(
         +(ll.wage * ll.hours * 1.25).toFixed(2)
       );

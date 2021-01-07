@@ -20,8 +20,14 @@ import DataGrid, {
 import { db } from "../../firebase";
 
 const VendorListPage = (props) => {
-  const { user } = useAuth();
-  
+  const { user, signOut } = useAuth();
+
+  useEffect(() => {
+    if (!user) {
+      signOut();
+    }
+  }, []);
+
   const store = useMemo(() => {
     return new DataSource({
       key: "id",
@@ -53,7 +59,6 @@ const VendorListPage = (props) => {
     };
   }, []);
 
-
   return (
     <React.Fragment>
       <h2 className={"content-block"}>Vendor List</h2>
@@ -67,7 +72,6 @@ const VendorListPage = (props) => {
         columnHidingEnabled={true}
         allowColumnResizing={true}
         rowAlternationEnabled={true}
-
       >
         <Paging defaultPageSize={10} />
         <Pager showPageSizeSelector={true} showInfo={true} />
@@ -93,14 +97,14 @@ const VendorListPage = (props) => {
             </Item>
           </Form>
         </Editing>
-         <Column type="buttons" width={110}>
-          <Button name="edit"/>
-          <Button name="delete" visible={user.isAdmin}/>
+        <Column type="buttons" width={110}>
+          <Button name="edit" />
+          <Button name="delete" visible={user.isAdmin} />
         </Column>
         <Column dataField="name" caption="Vendor Name" alignment="center">
           <RequiredRule />
         </Column>
-       
+
         <Column
           dataField="notes"
           caption="Notes"

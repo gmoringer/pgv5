@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../contexts/auth";
 import DataSource from "devextreme/data/data_source";
 import { Item } from "devextreme-react/form";
-import Firebase from 'firebase'
+import Firebase from "firebase";
 import DataGrid, {
   Column,
   Pager,
@@ -17,7 +17,7 @@ import DataGrid, {
   Form,
   Button,
   Export,
-  SelectBox
+  SelectBox,
 } from "devextreme-react/data-grid";
 
 import { db } from "../../firebase";
@@ -27,8 +27,14 @@ const PropertyListPage = (props) => {
   const [properties, setProperties] = useState([]);
   const [propertyManaged, setPropertiesManaged] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false)
-  const { user } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const { user, signOut } = useAuth();
+
+  useEffect(() => {
+    if (!user) {
+      signOut();
+    }
+  }, []);
 
   useEffect(() => {
     db.getAllUsers().then((res) => {
@@ -43,10 +49,10 @@ const PropertyListPage = (props) => {
       const result = [];
       res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
       setProperties(result);
-      
-      const propertyManaged = result.filter(property => {
-        return (property.am === user.uid) && property.active
-      })
+
+      const propertyManaged = result.filter((property) => {
+        return property.am === user.uid && property.active;
+      });
       setPropertiesManaged(propertyManaged);
     });
   }, []);
@@ -63,11 +69,16 @@ const PropertyListPage = (props) => {
         const result = [];
         await db.getAllJobs().then((snap) =>
           snap.forEach(async (doc) => {
-            const st = props.find((prop) => {
-              return prop.uid === doc.data().property;
-            });
-            const data = { ...doc.data(), uid: doc.id, active: st.active };
-            result.push(data);
+            {
+              const st = props.find((prop) => {
+                return prop.uid === doc.data().property;
+              });
+
+              if (st) {
+                const data = { ...doc.data(), uid: doc.id, active: st.active };
+                result.push(data);
+              }
+            }
           })
         );
         return result;
@@ -78,14 +89,14 @@ const PropertyListPage = (props) => {
       },
       insert: async (values) => {
         await db.addNewJob(values, user);
-        setIsEditing(false)
-        setFormOpen(false)
+        setIsEditing(false);
+        setFormOpen(false);
         store.load();
       },
       update: async (key, value) => {
         await db.updateOneJob(key, value);
-        setIsEditing(false)
-        setFormOpen(false)
+        setIsEditing(false);
+        setFormOpen(false);
         store.load();
       },
     });
@@ -102,8 +113,8 @@ const PropertyListPage = (props) => {
   }, []);
 
   const changeEditingStatus = () => {
-    setIsEditing(!isEditing)
-  }
+    setIsEditing(!isEditing);
+  };
 
   return (
     <React.Fragment>
@@ -118,10 +129,12 @@ const PropertyListPage = (props) => {
         columnHidingEnabled={true}
         allowColumnResizing={true}
         rowAlternationEnabled={true}
-        onEditingStart={()=> {
-          setIsEditing(true)}}
-        onDisposing={()=> {
-          setIsEditing(false)}}
+        onEditingStart={() => {
+          setIsEditing(true);
+        }}
+        onDisposing={() => {
+          setIsEditing(false);
+        }}
         onRowPrepared={(e) => {
           if (e.rowType === "data" && e.data.active === false) {
             e.rowElement.style.backgroundColor = "Tomato";
@@ -143,12 +156,14 @@ const PropertyListPage = (props) => {
           allowDeleting={user.isAdmin}
           allowUpdating={true}
         >
-          <Popup 
-            onShowing={(e)=> {
-              setFormOpen(true)}}
+          <Popup
+            onShowing={(e) => {
+              setFormOpen(true);
+            }}
             onHiding={(e) => {
-              setIsEditing(false)
-              setFormOpen(false)}}
+              setIsEditing(false);
+              setFormOpen(false);
+            }}
             title="New Job Entry"
             showTitle={true}
             width={700}
@@ -198,10 +213,15 @@ const PropertyListPage = (props) => {
           allowEditing={false}
           defaultSortOrder="desc"
         />
-        <Column dataField={"property"} caption={"Property"} allowEditing={!isEditing}>
+        <Column
+          dataField={"property"}
+          caption={"Property"}
+          allowEditing={!isEditing}
+        >
           <Lookup
             dataSource={() => {
-              return formOpen ? propertyManaged : properties}}
+              return formOpen ? propertyManaged : properties;
+            }}
             valueExpr={"uid"}
             displayExpr={"address"}
           />
@@ -237,7 +257,7 @@ const PropertyListPage = (props) => {
             displayExpr={"initials"}
           />
         </Column>
-        <Column dataField={"price"} caption={"Price"} dataType='number'>
+        <Column dataField={"price"} caption={"Price"} dataType="number">
           <RequiredRule />
           <Format type="currency" precision={2}></Format>
         </Column>
