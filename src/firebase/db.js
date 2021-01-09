@@ -30,8 +30,6 @@ export const addNewVendor = (vendor, user) => {
 };
 
 export const addNewProperty = async (property, user) => {
-  console.log("ADDNEWPROP");
-  console.log(user);
   const lastNr = await getLastProperty();
   const propNr =
     lastNr.docs.length === 0
@@ -129,7 +127,6 @@ export const addNewPo = async (po, user) => {
       am: user.uid,
     })
     .then((res) => {
-      console.log(po);
       const increment = firebase.firestore.FieldValue.increment(po.amount);
       db.collection("jobs").doc(po.jobnr).update({ materialssum: increment });
     });
@@ -182,7 +179,6 @@ export const updateLaborLog = async (key, value) => {
   if (typeof updatedValue === "number") {
     const delta = -prevValue + updatedValue;
     const amount = parseInt(delta);
-    console.log(amount);
     const increment = firebase.firestore.FieldValue.increment(delta);
     db.collection("jobs").doc(llOldData.jobnr).update({ laborsum: increment });
     db.collection("labor")
@@ -226,8 +222,6 @@ export const addNewLaborLog = (ll, user) => {
     .add({ ...ll, am: user.uid })
     .then((res) => {
       const sum = +(ll.wage * ll.hours * 1.25).toFixed(2);
-      console.log(typeof sum);
-      console.log(sum);
       const increment = firebase.firestore.FieldValue.increment(
         +(ll.wage * ll.hours * 1.25).toFixed(2)
       );

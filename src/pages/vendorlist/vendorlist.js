@@ -101,7 +101,12 @@ const VendorListPage = (props) => {
           <Button name="edit" />
           <Button name="delete" visible={user.isAdmin} />
         </Column>
-        <Column dataField="name" caption="Vendor Name" alignment="center">
+        <Column
+          dataField="name"
+          caption="Vendor Name"
+          alignment="center"
+          defaultSortOrder="asc"
+        >
           <RequiredRule />
         </Column>
 
