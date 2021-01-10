@@ -29,6 +29,7 @@ const PropertyListPage = (props) => {
   const [formOpen, setFormOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const { user, signOut } = useAuth();
+  const [type, setType] = useState(["C", "E"]);
 
   useEffect(() => {
     if (!user) {
@@ -54,6 +55,16 @@ const PropertyListPage = (props) => {
         return property.am === user.uid && property.active;
       });
       setPropertiesManaged(propertyManaged);
+    });
+  }, []);
+
+  useEffect(() => {
+    db.getAllJobTypes().then((snap) => {
+      const result = [];
+      snap.forEach((doc) => {
+        result.push({ ...doc.data(), uid: doc.id });
+      });
+      setType(result);
     });
   }, []);
 
@@ -175,11 +186,13 @@ const PropertyListPage = (props) => {
             <Item itemType="group" colCount={2} colSpan={2}>
               <Item dataField="property" />
               <Item dataField="jobtitle" />
+              <Item dataField="type" />
               <Item dataField="price" />
               <Item dataField="dateapproved" />
+         
+            </Item>
               <Item dataField="sub" />
               <Item dataField="completed" />
-            </Item>
           </Form>
         </Editing>
         <Column
@@ -233,6 +246,11 @@ const PropertyListPage = (props) => {
           allowSorting={false}
         >
           <RequiredRule />
+        </Column>
+
+        <Column dataField={"type"} caption={"Type"}>
+          <RequiredRule />
+          <Lookup dataSource={type} valueExpr={"uid"} displayExpr={formOpen ? "name" : "short"} />
         </Column>
         <Column
           dataField={"dateapproved"}

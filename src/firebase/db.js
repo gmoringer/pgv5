@@ -15,6 +15,8 @@ export const deleteOneVendor = (key) =>
 
 export const getAllProperties = () => db.collection("properties").get();
 
+export const getAllJobTypes = () => db.collection("jobtypes").get();
+
 export const deleteOneProperty = (key) => {
   db.collection("properties").doc(key).update({
     active: false,
