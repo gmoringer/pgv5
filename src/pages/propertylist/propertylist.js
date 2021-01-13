@@ -55,10 +55,7 @@ const PropertyListPage = (props) => {
         store.load();
       },
       insert: async (values) => {
-        console.log(values);
-        console.log(user);
         await db.addNewProperty(values, user);
-
         store.load();
       },
       update: async (key, value) => {

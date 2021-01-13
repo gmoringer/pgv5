@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../contexts/auth";
-import { states } from "../../constants";
 import DataSource from "devextreme/data/data_source";
 import { Item } from "devextreme-react/form";
+import { Autocomplete } from "devextreme-react/autocomplete";
+
+
+import notify from "devextreme/ui/notify";
+
 import DataGrid, {
   Column,
   Pager,
   Paging,
   FilterRow,
-  Lookup,
   Editing,
   RequiredRule,
   Popup,
@@ -17,10 +20,17 @@ import DataGrid, {
   Button,
 } from "devextreme-react/data-grid";
 
+import ArrayStore from "devextreme/data/array_store";
+
 import { db } from "../../firebase";
 
 const VendorListPage = (props) => {
   const { user, signOut } = useAuth();
+  const [vendors, setVendors] = useState();
+  const [name, setName] = useState({});
+
+  const [formOpen, setFormOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -28,9 +38,13 @@ const VendorListPage = (props) => {
     }
   }, []);
 
-  const store = useMemo(() => {
-    return new DataSource({
+  useEffect(() => console.log("Editing: ", isEditing), [isEditing])
+  useEffect(() => console.log("Form Open: ", formOpen), [formOpen])
+
+  const datasource = useMemo(() => {
+    const datasource = new DataSource({
       key: "id",
+      loadMode: "raw",
       load: async () => {
         const result = [];
         await db
@@ -38,33 +52,70 @@ const VendorListPage = (props) => {
           .then((snap) =>
             snap.forEach((doc) => result.push({ ...doc.data(), id: doc.id }))
           );
+          setVendors(result)
         return result;
       },
       remove: async (key) => {
-        await db.deleteOneVendor(key).then(store.load());
+        await db.deleteOneVendor(key).then(datasource.load());
       },
       insert: async (values) => {
-        await db.addNewVendor(values, user);
-        store.load();
+        const result = [];
+        setIsEditing(false);
+        setFormOpen(false);
+        await db
+          .getAllVendors()
+          .then((snap) =>
+            snap.forEach((doc) => result.push({ ...doc.data(), id: doc.id }))
+          );
+        
+        const data = { ...values, name: name };
+        result.find(vendor => vendor.name === values.name) ? await db.addNewVendor(values, user) : void
+
+
+        
+        datasource.load();
       },
       update: (key, value) => {
-        db.updateOneVendor(key, value).then((res) => store.load());
+        setFormOpen(false);
+        setIsEditing(false);
+        db.updateOneVendor(key, value).then((res) => datasource.load());
       },
     });
+    return datasource;
   }, []);
-
+  
   useEffect(() => {
     return () => {
-      store.dispose();
+      datasource.dispose();
     };
   }, []);
+
+  const handleChangeName = (e) => {
+    setName({name: e.value})
+  }
+
+  const onRowInserted = (e) => {
+    console.log(vendors)
+      const result = [];
+      const dup = vendors.find(vendor => vendor.name === name.name) 
+
+      if (dup) {
+        notify({message: "Duplicate Vendor!", position: {at: "top", offset:"0 230"}}, "error", 500)
+        e.cancel = Promise.resolve(true)
+      } else if (name.name === '' || typeof name.name !== 'string') {
+         notify({message: "Please enter vendor!", position: {at: "top", offset:"0 230"}}, "error", 500)
+        e.cancel = Promise.resolve(true)
+      } else {
+        e.data = {...e.data, ...name}
+      }  
+  }
 
   return (
     <React.Fragment>
       <h2 className={"content-block"}>Vendor List</h2>
       <DataGrid
         className={"dx-card wide-card"}
-        dataSource={store}
+        dataSource={datasource}
         showBorders={false}
         focusedRowEnabled={true}
         defaultFocusedRowIndex={0}
@@ -72,6 +123,13 @@ const VendorListPage = (props) => {
         columnHidingEnabled={true}
         allowColumnResizing={true}
         rowAlternationEnabled={true}
+        onRowInserting={onRowInserted}
+        onEditingStart={() => {
+          setIsEditing(true);
+        }}
+        onDisposing={() => {
+          setIsEditing(false);
+        }}
       >
         <Paging defaultPageSize={10} />
         <Pager showPageSizeSelector={true} showInfo={true} />
@@ -87,12 +145,26 @@ const VendorListPage = (props) => {
             showTitle={true}
             width={700}
             height={300}
+            onShowing={(e) => {
+              return setFormOpen(true);
+            }}
+            onHiding={(e) => {
+              setIsEditing(false);
+              setFormOpen(false);
+            }}
           >
             <Position my="top" at="top" of={window} />
           </Popup>
           <Form>
             <Item itemType="group" colCount={1} colSpan={2}>
-              <Item dataField="name" />
+              {!isEditing ? <Item dataField="name" >
+                <Autocomplete
+                  dataSource={datasource.store()}
+                  valueExpr={"name"}
+                  placeholder="Enter Vendor Name..."
+                  onValueChanged={handleChangeName}
+                ><RequiredRule/></Autocomplete></Item> : <Item dataField="name" ><RequiredRule/></Item>}
+              {/* {isEditing && <Item dataField="name" ><RequiredRule/></Item>} */}
               <Item dataField="notes" />
             </Item>
           </Form>
@@ -106,6 +178,7 @@ const VendorListPage = (props) => {
           caption="Vendor Name"
           alignment="center"
           defaultSortOrder="asc"
+          //  cellRender={renderGridCell}
         >
           <RequiredRule />
         </Column>
