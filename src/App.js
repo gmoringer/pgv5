@@ -10,7 +10,6 @@ import { AuthProvider, useAuth } from "./contexts/auth";
 import { useScreenSizeClass } from "./utils/media-query";
 import Content from "./Content";
 import NotAuthenticatedContent from "./NotAuthenticatedContent";
-import {db} from "./firebase"
 
 function App() {
   const { user, loading } = useAuth();

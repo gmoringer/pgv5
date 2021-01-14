@@ -4,7 +4,6 @@ import DataSource from "devextreme/data/data_source";
 import { Item } from "devextreme-react/form";
 import { Autocomplete } from "devextreme-react/autocomplete";
 
-
 import notify from "devextreme/ui/notify";
 
 import DataGrid, {
@@ -19,8 +18,6 @@ import DataGrid, {
   Form,
   Button,
 } from "devextreme-react/data-grid";
-
-import ArrayStore from "devextreme/data/array_store";
 
 import { db } from "../../firebase";
 
@@ -38,8 +35,6 @@ const VendorListPage = (props) => {
     }
   }, []);
 
-  useEffect(() => console.log("Editing: ", isEditing), [isEditing])
-  useEffect(() => console.log("Form Open: ", formOpen), [formOpen])
 
   const datasource = useMemo(() => {
     const datasource = new DataSource({
@@ -56,23 +51,24 @@ const VendorListPage = (props) => {
         return result;
       },
       remove: async (key) => {
+
+        
         await db.deleteOneVendor(key).then(datasource.load());
       },
       insert: async (values) => {
         const result = [];
-        setIsEditing(false);
-        setFormOpen(false);
         await db
           .getAllVendors()
           .then((snap) =>
             snap.forEach((doc) => result.push({ ...doc.data(), id: doc.id }))
           );
         
-        const data = { ...values, name: name };
-        result.find(vendor => vendor.name === values.name) ? await db.addNewVendor(values, user) : void
+        const data = { ...values, ...name };
+        await db.addNewVendor(data, user)
 
+        setIsEditing(false);
+        setFormOpen(false);
 
-        
         datasource.load();
       },
       update: (key, value) => {
@@ -95,7 +91,6 @@ const VendorListPage = (props) => {
   }
 
   const onRowInserted = (e) => {
-    console.log(vendors)
       const result = [];
       const dup = vendors.find(vendor => vendor.name === name.name) 
 
@@ -164,7 +159,6 @@ const VendorListPage = (props) => {
                   placeholder="Enter Vendor Name..."
                   onValueChanged={handleChangeName}
                 ><RequiredRule/></Autocomplete></Item> : <Item dataField="name" ><RequiredRule/></Item>}
-              {/* {isEditing && <Item dataField="name" ><RequiredRule/></Item>} */}
               <Item dataField="notes" />
             </Item>
           </Form>
@@ -178,7 +172,6 @@ const VendorListPage = (props) => {
           caption="Vendor Name"
           alignment="center"
           defaultSortOrder="asc"
-          //  cellRender={renderGridCell}
         >
           <RequiredRule />
         </Column>

@@ -10,10 +10,9 @@ export default () => {
   );
 
   //  const [currentUser, setCurrentUser] = useAuth()
-
-  const [users, setUsers] = useState([]);
-  const { user } = useAuth();
-  const [currentUsr, setCurrentUsr] = useState();
+  // const [users, setUsers] = useState([]);
+  // const { user } = useAuth();
+  // const [currentUsr, setCurrentUsr] = useState();
 
   useEffect(() => {
     const result = [];
@@ -21,9 +20,9 @@ export default () => {
       res.docs.forEach((doc) => {
         result.push({ ...doc.data() });
       });
-      setUsers(result);
-      const currentUsr = result.find((usr) => usr.email === user.email);
-      setCurrentUsr(currentUsr);
+      // setUsers(result);
+      // const currentUsr = result.find((usr) => usr.email === user.email);
+      // setCurrentUsr(currentUsr);
     });
   }, []);
 

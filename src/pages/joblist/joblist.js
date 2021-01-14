@@ -17,7 +17,6 @@ import DataGrid, {
   Form,
   Button,
   Export,
-  SelectBox,
 } from "devextreme-react/data-grid";
 
 import { db } from "../../firebase";
@@ -84,7 +83,6 @@ const PropertyListPage = (props) => {
               const st = props.find((prop) => {
                 return prop.uid === doc.data().property;
               });
-
               if (st) {
                 const data = { ...doc.data(), uid: doc.id, active: st.active };
                 result.push(data);
@@ -122,10 +120,6 @@ const PropertyListPage = (props) => {
       store.dispose();
     };
   }, []);
-
-  const changeEditingStatus = () => {
-    setIsEditing(!isEditing);
-  };
 
   return (
     <React.Fragment>
