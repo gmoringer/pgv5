@@ -104,7 +104,8 @@ export const getLastJob = () =>
   db.collection("jobs").orderBy("jobnr", "desc").limit(1).get();
 
 export const updateJobPrice = (value, job) => {
-  const amount = parseInt(value);
+  const amount = value;
+  console.log(value)
   const increment = firebase.firestore.FieldValue.increment(amount);
   db.collection("jobs").doc(job).update({ materialssum: increment });
 };
@@ -146,12 +147,12 @@ export const updatePo = (key, value) => {
     const oldValue = poOldData.amount;
     const newValue = value.amount;
 
-    const delta = newValue - oldValue;
+    const delta = +((newValue - oldValue).toFixed(2));
 
     return await db
       .collection("pos")
       .doc(key)
-      .update({ ...value, date: Firebase.firestore.Timestamp.now() })
+      .update({ ...value })
       .then(async () => {
         if (typeof value.amount === "number") {
           const increment = firebase.firestore.FieldValue.increment(delta);
@@ -197,7 +198,7 @@ export const deleteOnePo = async (key) => {
     .doc(key)
     .delete()
     .then(() => {
-      updateJobPrice(-1 * amount, jobnr);
+      updateJobPrice(-(amount.toFixed(2)), jobnr);
     });
 };
 

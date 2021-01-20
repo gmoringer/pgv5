@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../contexts/auth";
 import DataSource from "devextreme/data/data_source";
 import { Item } from "devextreme-react/form";
+import Firebase from "firebase";
 import DataGrid, {
   Column,
   Pager,
@@ -205,7 +206,7 @@ const PoListPage = (props) => {
             title="New PO Entry"
             showTitle={true}
             width={700}
-            height={350}
+            height={450}
             onShowing={(e) => {
               setFormOpen(true);
             }}
@@ -219,6 +220,7 @@ const PoListPage = (props) => {
           <Form>
             <Item itemType="group" colCount={2} colSpan={2}>
               <Item dataField="jobnr" />
+              <Item dataField="date" />
               <Item dataField="desc" />
               <Item dataField="amount" />
               <Item dataField="paidby" />
@@ -280,11 +282,13 @@ const PoListPage = (props) => {
 
         <Column
           dataField={"date"}
-          caption={"Last Updated"}
-          allowSorting={false}
+          caption={"Purchase Date"}
           dataType="date"
+          allowSorting={true}
           calculateCellValue={(res) => {
-            return res.date ? res.date.toDate() : null;
+            return res.date instanceof Firebase.firestore.Timestamp
+              ? res.date.toDate()
+              : res.date;
           }}
         />
         <Column dataField={"type"} caption={"Type"} allowSorting={false}>
