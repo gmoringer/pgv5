@@ -89,7 +89,6 @@ const PropertyListPage = (props) => {
         focusedRowEnabled={true}
         defaultFocusedRowIndex={0}
         columnAutoWidth={true}
-        // columnHidingEnabled={true}
         allowColumnResizing={true}
         rowAlternationEnabled={true}
         onRowPrepared={(e) => {

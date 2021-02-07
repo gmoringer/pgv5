@@ -18,7 +18,10 @@ const devConfig = {
   messagingSenderId: process.env.REACT_APP_DEV_MESSAGING_SENDER_ID,
 };
 
-const config = process.env.NODE_ENV === "production" ? prodConfig : devConfig;
+const production = false;
+
+const config = production ? prodConfig : devConfig;
+// const config = process.env.NODE_ENV === "production" ? prodConfig : devConfig;
 
 if (!firebase.apps.length) {
   firebase.initializeApp(config);
