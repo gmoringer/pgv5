@@ -33,10 +33,6 @@ const PoListPage = (props) => {
   const [isEditing, setIsEditing] = useState(false);
   const { user, signOut } = useAuth();
 
-  const isPropertyManager = (e) => {
-    return e ? e.row.data.am === user.uid : false;
-  };
-
   useEffect(() => {
     if (!user) {
       signOut();
@@ -75,7 +71,6 @@ const PoListPage = (props) => {
 
   useEffect(() => {
     const result = [];
-
     async function fetchdata() {
       return await db.getAllProperties().then((res) => {
         res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
@@ -91,11 +86,11 @@ const PoListPage = (props) => {
           });
 
           if (currentPropNr) {
-          jobsDownload.push({
-            ...doc.data(),
-            uid: doc.id,
-            propertynr: currentPropNr.propertynr,
-          });
+            jobsDownload.push({
+              ...doc.data(),
+              uid: doc.id,
+              propertynr: currentPropNr.propertynr,
+            });
           }
         });
         setJobs(jobsDownload);
@@ -105,7 +100,10 @@ const PoListPage = (props) => {
             return job.property === prop.uid;
           });
 
-          return job.am === user.uid && currentProp.active;
+          return (
+            (job.am === user.uid && currentProp.active) ||
+            job.propertynr === 4000
+          );
         });
         setJobsManaged(jobsManaged);
       })
@@ -125,9 +123,24 @@ const PoListPage = (props) => {
       key: "uid",
       load: async () => {
         const result = [];
+        const jobList = [];
+        await db
+          .getAllJobs()
+          .then((snaps) =>
+            snaps.forEach((doc) => jobList.push({ ...doc.data(), uid: doc.id }))
+          );
         await db.getAllPos().then((snaps) =>
           snaps.forEach((snap) => {
-            result.push({ ...snap.data(), uid: snap.id });
+            const data = snap.data();
+            const currentJob = jobList.find((job) => {
+              return job.uid === data.jobnr;
+            });
+            result.push({
+              ...data,
+              uid: snap.id,
+              isPropManager: data.am === user.uid,
+              isOpenToChange: currentJob.property === "PdD6MdiFxiJa8TpNspY6",
+            });
           })
         );
         return result;
@@ -175,25 +188,15 @@ const PoListPage = (props) => {
         columnHidingEnabled={true}
         allowColumnResizing={true}
         rowAlternationEnabled={true}
-        onEditingStart={() => {
+        onEditingStart={(res) => {
           setIsEditing(true);
         }}
         onDisposing={() => {
           setIsEditing(false);
         }}
-        onRowPrepared={(e) => {
-          if (e.rowType === "data" && e.data.active === false) {
-            e.rowElement.style.backgroundColor = "Tomato";
-            e.rowElement.style.opacity = 0.8;
-            e.rowElement.className = e.rowElement.className.replace(
-              "dx-row-alt",
-              ""
-            );
-          }
-        }}
       >
         <Export enabled={true} />
-        <Paging defaultPageSize={10} />
+        <Paging enabled={false} />
         <Pager showPageSizeSelector={true} showInfo={true} />
         <FilterRow visible={true} />
         <Editing
@@ -237,10 +240,19 @@ const PoListPage = (props) => {
           }}
         ></Column>
         <Column type="buttons" width={110}>
-          <Button name="edit" visible={(e) => isPropertyManager(e)} />
+          <Button
+            name="edit"
+            visible={(e) => {
+              const data = e.row.data;
+              return data.isPropManager;
+            }}
+          />
           <Button
             name="delete"
-            visible={(e) => isPropertyManager(e) || user.isAdmin}
+            visible={(e) => {
+              const data = e.row.data;
+              return data.isPropManager;
+            }}
           />
         </Column>
         <Column
@@ -253,8 +265,16 @@ const PoListPage = (props) => {
         />
         <Column dataField={"jobnr"} caption={"Job"} allowEditing={!isEditing}>
           <Lookup
-            dataSource={() => {
-              return formOpen ? jobsManaged : jobs;
+            dataSource={(e) => {
+              const returnData = formOpen
+                ? jobs.filter((job) => {
+                    return (
+                      job.am === user.uid ||
+                      job.property === "PdD6MdiFxiJa8TpNspY6"
+                    );
+                  })
+                : jobs;
+              return returnData;
             }}
             valueExpr={"uid"}
             displayExpr={(res) => {
