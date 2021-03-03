@@ -25,7 +25,6 @@ const PoListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const [jobs, setJobs] = useState([]);
 
-  const [jobsManaged, setJobsManaged] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [properties, setProperties] = useState([]);
   const [potypes, setPoTypes] = useState();
@@ -90,22 +89,13 @@ const PoListPage = (props) => {
               ...doc.data(),
               uid: doc.id,
               propertynr: currentPropNr.propertynr,
+              editForAll: currentPropNr.editForAll
+                ? currentPropNr.editForAll
+                : false,
             });
           }
         });
         setJobs(jobsDownload);
-
-        const jobsManaged = jobsDownload.filter((job) => {
-          const currentProp = result.find((prop) => {
-            return job.property === prop.uid;
-          });
-
-          return (
-            (job.am === user.uid && currentProp.active) ||
-            job.propertynr === 4000
-          );
-        });
-        setJobsManaged(jobsManaged);
       })
     );
   }, []);
@@ -132,14 +122,11 @@ const PoListPage = (props) => {
         await db.getAllPos().then((snaps) =>
           snaps.forEach((snap) => {
             const data = snap.data();
-            const currentJob = jobList.find((job) => {
-              return job.uid === data.jobnr;
-            });
+
             result.push({
               ...data,
               uid: snap.id,
               isPropManager: data.am === user.uid,
-              isOpenToChange: currentJob.property === "PdD6MdiFxiJa8TpNspY6",
             });
           })
         );
@@ -270,7 +257,7 @@ const PoListPage = (props) => {
                 ? jobs.filter((job) => {
                     return (
                       job.am === user.uid ||
-                      job.property === "PdD6MdiFxiJa8TpNspY6"
+                      job.editForAll
                     );
                   })
                 : jobs;
