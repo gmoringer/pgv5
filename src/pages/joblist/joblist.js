@@ -172,6 +172,7 @@ const JobListPage = (props) => {
               <Item dataField="type" />
               <Item dataField="price" />
               <Item dataField="dateapproved" />
+             <Item dataField="amdel" />
             </Item>
             <Item dataField="sub" />
             <Item dataField="completed" />
@@ -208,7 +209,6 @@ const JobListPage = (props) => {
             dataSource={() => {
               return formOpen
                 ? properties.filter((prop) => {
-                    console.log(prop);
                     return prop.am === user.uid || prop.editForAll;
                   })
                 : properties;
@@ -255,6 +255,30 @@ const JobListPage = (props) => {
             dataSource={managers}
             valueExpr={"uid"}
             displayExpr={"initials"}
+          />
+        </Column>
+              <Column
+          dataField={"amdel"}
+          caption={"AM Deligate"}
+          allowFiltering={true}
+          allowSorting={false}
+          alignment="center"
+          visible={false}
+        >
+          <Lookup
+            dataSource={() => {
+              const addNone = [ {
+                fullname: '-',
+                initials: 'NONE',
+                uid: false
+              }, ...managers]
+              return addNone
+              }}
+            valueExpr='uid'
+            displayExpr={(e) => {
+              return e.fullname
+            }}
+            disabled={false}
           />
         </Column>
         <Column dataField={"price"} caption={"Price"} dataType="number">
