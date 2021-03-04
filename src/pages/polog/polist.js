@@ -148,11 +148,6 @@ const PoListPage = (props) => {
         store.load();
       },
     });
-
-    if (!user.isAdmin) {
-      newStore.filter("active", "=", true);
-    }
-
     return newStore;
   }, []);
 
@@ -219,13 +214,6 @@ const PoListPage = (props) => {
             </Item>
           </Form>
         </Editing>
-        <Column
-          dataField="active"
-          visible={user.isAdmin}
-          calculateCellValue={(res) => {
-            return res.active || res.active === undefined ? true : false;
-          }}
-        ></Column>
         <Column type="buttons" width={110}>
           <Button
             name="edit"
@@ -255,10 +243,7 @@ const PoListPage = (props) => {
             dataSource={(e) => {
               const returnData = formOpen
                 ? jobs.filter((job) => {
-                    return (
-                      job.am === user.uid ||
-                      job.editForAll
-                    );
+                    return job.am === user.uid || job.editForAll;
                   })
                 : jobs;
               return returnData;

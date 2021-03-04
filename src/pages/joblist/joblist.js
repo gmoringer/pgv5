@@ -21,10 +21,10 @@ import DataGrid, {
 
 import { db } from "../../firebase";
 
-const PropertyListPage = (props) => {
+const JobListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const [properties, setProperties] = useState([]);
-  const [propertyManaged, setPropertiesManaged] = useState([]);
+
   const [formOpen, setFormOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const { user, signOut } = useAuth();
@@ -49,11 +49,6 @@ const PropertyListPage = (props) => {
       const result = [];
       res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
       setProperties(result);
-
-      const propertyManaged = result.filter((property) => {
-        return property.am === user.uid && property.active;
-      });
-      setPropertiesManaged(propertyManaged);
     });
   }, []);
 
@@ -72,21 +67,28 @@ const PropertyListPage = (props) => {
       key: "uid",
       load: async () => {
         var props = [];
+
         await db.getAllProperties().then((res) => {
           res.forEach((doc) => props.push({ ...doc.data(), uid: doc.id }));
         });
 
         const result = [];
+
         await db.getAllJobs().then((snap) =>
-          snap.forEach(async (doc) => {
-            {
-              const st = props.find((prop) => {
-                return prop.uid === doc.data().property;
-              });
-              if (st) {
-                const data = { ...doc.data(), uid: doc.id, active: st.active };
-                result.push(data);
-              }
+          snap.forEach(async (snap) => {
+            const data = snap.data();
+
+            const currentProperty = props.find((prop) => {
+              return prop.uid === data.property;
+            });
+
+            if (currentProperty) {
+              const currentJob = {
+                ...data,
+                uid: snap.id,
+                isPropManager: data.am === user.uid,
+              };
+              result.push(currentJob);
             }
           })
         );
@@ -109,9 +111,6 @@ const PropertyListPage = (props) => {
         store.load();
       },
     });
-    if (!user.isAdmin) {
-      newStore.filter("active", "=", true);
-    }
     return newStore;
   }, []);
 
@@ -140,19 +139,9 @@ const PropertyListPage = (props) => {
         onDisposing={() => {
           setIsEditing(false);
         }}
-        onRowPrepared={(e) => {
-          if (e.rowType === "data" && e.data.active === false) {
-            e.rowElement.style.backgroundColor = "Tomato";
-            e.rowElement.style.opacity = 0.8;
-            e.rowElement.className = e.rowElement.className.replace(
-              "dx-row-alt",
-              ""
-            );
-          }
-        }}
       >
         <Export enabled={true} />
-        <Paging defaultPageSize={10} />
+        <Paging defaultPageSize={50} />
         <Pager showPageSizeSelector={true} showInfo={true} />
         <FilterRow visible={true} />
         <Editing
@@ -183,33 +172,23 @@ const PropertyListPage = (props) => {
               <Item dataField="type" />
               <Item dataField="price" />
               <Item dataField="dateapproved" />
-         
             </Item>
-              <Item dataField="sub" />
-              <Item dataField="completed" />
+            <Item dataField="sub" />
+            <Item dataField="completed" />
           </Form>
         </Editing>
-        <Column
-          dataField="active"
-          visible={user.isAdmin}
-          calculateCellValue={(res) => {
-            return res.active || res.active === undefined ? true : false;
-          }}
-        ></Column>
         <Column type="buttons">
           <Button
             name="edit"
             visible={(e) => {
-              return (
-                e.row.data.active &&
-                (e.row.data.am === user.uid || user.isAdmin)
-              );
+              const data = e.row.data;
+              return data.isPropManager;
             }}
           />
           <Button
             name="delete"
             visible={(e) => {
-              return e.row.data.active && user.isAdmin;
+              return false
             }}
           />
         </Column>
@@ -227,7 +206,12 @@ const PropertyListPage = (props) => {
         >
           <Lookup
             dataSource={() => {
-              return formOpen ? propertyManaged : properties;
+              return formOpen
+                ? properties.filter((prop) => {
+                    console.log(prop);
+                    return prop.am === user.uid || prop.editForAll;
+                  })
+                : properties;
             }}
             valueExpr={"uid"}
             displayExpr={"address"}
@@ -244,7 +228,11 @@ const PropertyListPage = (props) => {
 
         <Column dataField={"type"} caption={"Type"}>
           <RequiredRule />
-          <Lookup dataSource={type} valueExpr={"uid"} displayExpr={formOpen ? "name" : "short"} />
+          <Lookup
+            dataSource={type}
+            valueExpr={"uid"}
+            displayExpr={formOpen ? "name" : "short"}
+          />
         </Column>
         <Column
           dataField={"dateapproved"}
@@ -324,4 +312,4 @@ const PropertyListPage = (props) => {
   );
 };
 
-export default PropertyListPage;
+export default JobListPage;

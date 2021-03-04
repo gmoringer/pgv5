@@ -24,8 +24,7 @@ import { db } from "../../firebase";
 const PoListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const [jobs, setJobs] = useState([]);
-  const [jobsManaged, setJobsManaged] = useState([]);
-  const [propertyManaged, setPropertiesManaged] = useState([]);
+  // const [propertyManaged, setPropertiesManaged] = useState([]);
 
   const [properties, setProperties] = useState([]);
 
@@ -80,14 +79,6 @@ const PoListPage = (props) => {
 
         });
         setJobs(jobsDownload);
-
-        const jobsManaged = jobsDownload.filter((job) => {
-          const currentProp = result.find((prop) => {
-            return job.property === prop.uid;
-          });
-          return job.am === user.uid && currentProp.active;
-        });
-        setJobsManaged(jobsManaged);
       });
     });
   }, []);
@@ -97,11 +88,6 @@ const PoListPage = (props) => {
       const result = [];
       res.forEach((doc) => result.push({ ...doc.data(), uid: doc.id }));
       setProperties(result);
-
-      const propertyManaged = result.filter((property) => {
-        return property.am === user.uid && property.active;
-      });
-      setPropertiesManaged(propertyManaged);
     });
   }, []);
 
@@ -110,11 +96,11 @@ const PoListPage = (props) => {
       key: "uid",
       load: async () => {
         const result = [];
-        await db.getAllLaborLogs().then((snaps) =>
+        await db.getAllLaborLogs().then((snaps) => {
           snaps.forEach((snap) => {
-            result.push({ ...snap.data(), uid: snap.id });
+            result.push({ ...snap.data(), uid: snap.id,  isPropManager: snap.data().am === user.uid});
           })
-        );
+        });
         return result;
       },
       remove: async (key) => {
@@ -165,19 +151,9 @@ const PoListPage = (props) => {
         onDisposing={() => {
           setIsEditing(false);
         }}
-        onRowPrepared={(e) => {
-          if (e.rowType === "data" && e.data.active === false) {
-            e.rowElement.style.backgroundColor = "Tomato";
-            e.rowElement.style.opacity = 0.8;
-            e.rowElement.className = e.rowElement.className.replace(
-              "dx-row-alt",
-              ""
-            );
-          }
-        }}
       >
         <Export enabled={true} />
-        <Paging defaultPageSize={10} />
+        <Paging defaultPageSize={50} />
         <Pager showPageSizeSelector={true} showInfo={true} />
         <FilterRow visible={true} />
         <Editing
@@ -220,16 +196,27 @@ const PoListPage = (props) => {
           }}
         ></Column>
         <Column type="buttons" width={110}>
-          <Button name="edit" visible={(e) => isPropertyManager(e)} />
+          <Button 
+            name="edit"
+            visible={(e) => {
+              const data = e.row.data; 
+              return data.isPropManager
+              }} 
+            />
           <Button
             name="delete"
-            visible={(e) => isPropertyManager(e) || user.isAdmin}
+                visible={(e) => {
+              const data = e.row.data; 
+              return data.isPropManager
+              }} 
           />
         </Column>
         <Column dataField={"jobnr"} caption={"Job"} allowEditing={!isEditing}>
           <Lookup
             dataSource={() => {
-              return formOpen ? jobsManaged : jobs;
+              return formOpen ? jobs.filter((job) => {
+                    return job.am === user.uid || job.editForAll;
+                  }) : jobs;
             }}
             valueExpr={"uid"}
             displayExpr={(res) => {
@@ -258,7 +245,8 @@ const PoListPage = (props) => {
           dataField={"dateworked"}
           caption={"Date Worked"}
           dataType="date"
-          allowSorting={false}
+          allowSorting={true}
+          defaultSortOrder="desc"
           calculateCellValue={(res) => {
             return res.dateworked instanceof Firebase.firestore.Timestamp
               ? res.dateworked.toDate()
