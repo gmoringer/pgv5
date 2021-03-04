@@ -86,13 +86,13 @@ export default function () {
             <Link to={"/reset-password"}>Forgot password?</Link>
           </div>
         </Item>
-        <ButtonItem>
+        {/* <ButtonItem>
           <ButtonOptions
             text={"Create an account"}
             width={"100%"}
             onClick={onCreateAccountClick}
           />
-        </ButtonItem>
+        </ButtonItem> */}
       </Form>
     </form>
   );

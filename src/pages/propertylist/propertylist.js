@@ -104,7 +104,7 @@ const PropertyListPage = (props) => {
       >
         {/* <Selection deferred={true} /> */}
         <Export enabled={true} />
-        <Paging defaultPageSize={25} />
+        <Paging defaultPageSize={50} />
         <Pager showPageSizeSelector={true} showInfo={true} />
         <FilterRow visible={true} />
         <Editing
