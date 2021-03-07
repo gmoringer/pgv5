@@ -69,9 +69,9 @@ const PoListPage = (props) => {
               uid: doc.id,
               propertynr: currentProp.propertynr,
               edit:
+                currentProp.editForAll ||
                 docData.am === user.uid ||
-                docData.amdel === user.uid ||
-                currentProp.editForAll,
+                docData.amdel === user.uid,
             });
           }
         });
@@ -213,7 +213,6 @@ const PoListPage = (props) => {
           <Button
             name="edit"
             visible={(e) => {
-              console.log(e);
               const data = e.row.data;
               return data.isPropManager;
             }}
@@ -222,7 +221,6 @@ const PoListPage = (props) => {
             name="delete"
             visible={(e) => {
               const data = e.row.data;
-              console.log(data);
               return data.isPropManager;
             }}
           />
@@ -232,7 +230,7 @@ const PoListPage = (props) => {
             dataSource={() => {
               return formOpen
                 ? jobs.filter((job) => {
-                    return job.am === user.uid || job.editForAll;
+                    return job.edit;
                   })
                 : jobs;
             }}
