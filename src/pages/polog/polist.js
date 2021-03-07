@@ -80,18 +80,20 @@ const PoListPage = (props) => {
       db.getAllJobs().then((res) => {
         const jobsDownload = [];
         res.forEach((doc) => {
-          const currentPropNr = result.find((prop) => {
-            return prop.uid === doc.data().property;
-          });
+          const docData = doc.data();
 
-          if (currentPropNr) {
+          const currentProp = result.find((prop) => {
+            return prop.uid === docData.property;
+          });
+          if (currentProp) {
             jobsDownload.push({
-              ...doc.data(),
+              ...docData,
               uid: doc.id,
-              propertynr: currentPropNr.propertynr,
-              editForAll: currentPropNr.editForAll
-                ? currentPropNr.editForAll
-                : false,
+              propertynr: currentProp.propertynr,
+              edit:
+                currentProp.editForAll ||
+                docData.am === user.uid ||
+                docData.amdel === user.uid,
             });
           }
         });
@@ -123,10 +125,22 @@ const PoListPage = (props) => {
           snaps.forEach((snap) => {
             const data = snap.data();
 
+            const currentJob = jobList.find((job) => {
+              return job.uid === data.jobnr;
+            });
+
+            var amDel;
+
+            try {
+              amDel = currentJob.amdel;
+            } catch {
+              amDel = false;
+            }
+
             result.push({
               ...data,
               uid: snap.id,
-              isPropManager: data.am === user.uid,
+              isPropManager: data.am === user.uid || amDel === user.uid,
             });
           })
         );
@@ -219,6 +233,7 @@ const PoListPage = (props) => {
             name="edit"
             visible={(e) => {
               const data = e.row.data;
+              // console.log(data)
               return data.isPropManager;
             }}
           />
@@ -226,6 +241,7 @@ const PoListPage = (props) => {
             name="delete"
             visible={(e) => {
               const data = e.row.data;
+              // console.log(data)
               return data.isPropManager;
             }}
           />
@@ -243,7 +259,7 @@ const PoListPage = (props) => {
             dataSource={(e) => {
               const returnData = formOpen
                 ? jobs.filter((job) => {
-                    return job.am === user.uid || job.editForAll;
+                    return job.edit;
                   })
                 : jobs;
               return returnData;

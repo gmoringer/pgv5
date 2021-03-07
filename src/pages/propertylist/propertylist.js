@@ -63,9 +63,6 @@ const PropertyListPage = (props) => {
         store.load();
       },
     });
-    if (!user.isAdmin) {
-      newStore.filter("active", "=", true);
-    }
     return newStore;
   }, []);
 
@@ -91,28 +88,22 @@ const PropertyListPage = (props) => {
         columnAutoWidth={true}
         allowColumnResizing={true}
         rowAlternationEnabled={true}
-        onRowPrepared={(e) => {
-          if (e.rowType == "data" && e.data.active == false) {
-            e.rowElement.style.backgroundColor = "Tomato";
-            e.rowElement.style.opacity = 0.75;
-            e.rowElement.className = e.rowElement.className.replace(
-              "dx-row-alt",
-              ""
-            );
-          }
-        }}
+        // onRowPrepared={(e) => {
+        //   if (e.rowType == "data" && e.data.active == false) {
+        //     e.rowElement.style.backgroundColor = "Tomato";
+        //     e.rowElement.style.opacity = 0.75;
+        //     e.rowElement.className = e.rowElement.className.replace(
+        //       "dx-row-alt",
+        //       ""
+        //     );
+        //   }
+        // }}
       >
-        {/* <Selection deferred={true} /> */}
         <Export enabled={true} />
         <Paging defaultPageSize={50} />
         <Pager showPageSizeSelector={true} showInfo={true} />
         <FilterRow visible={true} />
-        <Editing
-          mode="popup"
-          allowAdding={true}
-          allowDeleting={user.isAdmin}
-          allowUpdating={true}
-        >
+        <Editing mode="popup" allowAdding={true} allowUpdating={true}>
           <Popup
             title="New Property Entry"
             showTitle={true}
@@ -131,24 +122,11 @@ const PropertyListPage = (props) => {
             </Item>
           </Form>
         </Editing>
-        <Column
-          dataField="active"
-          visible={user.isAdmin}
-          calculateCellValue={(res) => {
-            return res.active || res.active === undefined ? true : false;
-          }}
-        ></Column>
         <Column type="buttons">
           <Button
             name="edit"
             visible={(res) => {
-              return isPropertyManager(res) && res.row.data.active;
-            }}
-          />
-          <Button
-            name="delete"
-            visible={(res) => {
-              return res.row.data.active && user.isAdmin;
+              return isPropertyManager(res);
             }}
           />
         </Column>

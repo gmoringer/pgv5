@@ -147,7 +147,7 @@ const JobListPage = (props) => {
         <Editing
           mode="popup"
           allowAdding={true}
-          allowDeleting={user.isAdmin}
+          // allowDeleting={user.isAdmin}
           allowUpdating={true}
         >
           <Popup
@@ -172,7 +172,7 @@ const JobListPage = (props) => {
               <Item dataField="type" />
               <Item dataField="price" />
               <Item dataField="dateapproved" />
-             <Item dataField="amdel" />
+              <Item dataField="amdel" />
             </Item>
             <Item dataField="sub" />
             <Item dataField="completed" />
@@ -189,7 +189,7 @@ const JobListPage = (props) => {
           <Button
             name="delete"
             visible={(e) => {
-              return false
+              return false;
             }}
           />
         </Column>
@@ -257,7 +257,7 @@ const JobListPage = (props) => {
             displayExpr={"initials"}
           />
         </Column>
-              <Column
+        <Column
           dataField={"amdel"}
           caption={"AM Deligate"}
           allowFiltering={true}
@@ -267,16 +267,19 @@ const JobListPage = (props) => {
         >
           <Lookup
             dataSource={() => {
-              const addNone = [ {
-                fullname: '-',
-                initials: 'NONE',
-                uid: false
-              }, ...managers]
-              return addNone
-              }}
-            valueExpr='uid'
+              const addNone = [
+                {
+                  fullname: "-",
+                  initials: "-",
+                  uid: false,
+                },
+                ...managers,
+              ];
+              return addNone;
+            }}
+            valueExpr="uid"
             displayExpr={(e) => {
-              return e.fullname
+              return e.fullname;
             }}
             disabled={false}
           />
@@ -313,9 +316,11 @@ const JobListPage = (props) => {
           caption={"Margin"}
           allowEditing={false}
           format="percent"
-          calculateCellValue={(res) =>
-            1 - (res.laborsum + res.materialssum) / res.price
-          }
+          alignment="center"
+          calculateCellValue={(res) => {
+            const margin = 1 - (res.laborsum + res.materialssum) / res.price;
+            return isFinite(margin) ? margin : "-";
+          }}
         />
         <Column
           dataField="sub"

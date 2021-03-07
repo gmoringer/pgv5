@@ -24,7 +24,6 @@ import { db } from "../../firebase";
 const PoListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const [jobs, setJobs] = useState([]);
-  // const [propertyManaged, setPropertiesManaged] = useState([]);
 
   const [properties, setProperties] = useState([]);
 
@@ -32,10 +31,6 @@ const PoListPage = (props) => {
   const [isEditing, setIsEditing] = useState(false);
 
   const { user, signOut } = useAuth();
-
-  const isPropertyManager = (e) => {
-    return e ? e.row.data.am === user.uid : false;
-  };
 
   useEffect(() => {
     if (!user) {
@@ -64,19 +59,21 @@ const PoListPage = (props) => {
       db.getAllJobs().then((res) => {
         const jobsDownload = [];
         res.forEach((doc) => {
-          const currentPropNr = result.find((prop) => {
-            return prop.uid === doc.data().property;
+          const docData = doc.data();
+          const currentProp = result.find((prop) => {
+            return prop.uid === docData.property;
           });
-
-          if (currentPropNr) {
-
-          jobsDownload.push({
-            ...doc.data(),
-            uid: doc.id,
-            propertynr: currentPropNr.propertynr,
-          });
+          if (currentProp) {
+            jobsDownload.push({
+              ...docData,
+              uid: doc.id,
+              propertynr: currentProp.propertynr,
+              edit:
+                docData.am === user.uid ||
+                docData.amdel === user.uid ||
+                currentProp.editForAll,
+            });
           }
-
         });
         setJobs(jobsDownload);
       });
@@ -96,10 +93,34 @@ const PoListPage = (props) => {
       key: "uid",
       load: async () => {
         const result = [];
+        const jobList = [];
+        await db
+          .getAllJobs()
+          .then((snaps) =>
+            snaps.forEach((doc) => jobList.push({ ...doc.data(), uid: doc.id }))
+          );
+
         await db.getAllLaborLogs().then((snaps) => {
           snaps.forEach((snap) => {
-            result.push({ ...snap.data(), uid: snap.id,  isPropManager: snap.data().am === user.uid});
-          })
+            const data = snap.data();
+
+            const currentJob = jobList.find((job) => {
+              return job.uid === data.jobnr;
+            });
+
+            var amDel;
+
+            try {
+              amDel = currentJob.amdel;
+            } catch {
+              amDel = false;
+            }
+            result.push({
+              ...data,
+              uid: snap.id,
+              isPropManager: data.am === user.uid || amDel === user.uid,
+            });
+          });
         });
         return result;
       },
@@ -188,35 +209,32 @@ const PoListPage = (props) => {
             </Item>
           </Form>
         </Editing>
-        <Column
-          dataField="active"
-          visible={user.isAdmin}
-          calculateCellValue={(res) => {
-            return res.active || res.active === undefined ? true : false;
-          }}
-        ></Column>
         <Column type="buttons" width={110}>
-          <Button 
+          <Button
             name="edit"
             visible={(e) => {
-              const data = e.row.data; 
-              return data.isPropManager
-              }} 
-            />
+              console.log(e);
+              const data = e.row.data;
+              return data.isPropManager;
+            }}
+          />
           <Button
             name="delete"
-                visible={(e) => {
-              const data = e.row.data; 
-              return data.isPropManager
-              }} 
+            visible={(e) => {
+              const data = e.row.data;
+              console.log(data);
+              return data.isPropManager;
+            }}
           />
         </Column>
         <Column dataField={"jobnr"} caption={"Job"} allowEditing={!isEditing}>
           <Lookup
             dataSource={() => {
-              return formOpen ? jobs.filter((job) => {
+              return formOpen
+                ? jobs.filter((job) => {
                     return job.am === user.uid || job.editForAll;
-                  }) : jobs;
+                  })
+                : jobs;
             }}
             valueExpr={"uid"}
             displayExpr={(res) => {

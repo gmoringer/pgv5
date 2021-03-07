@@ -35,7 +35,6 @@ const VendorListPage = (props) => {
     }
   }, []);
 
-
   const datasource = useMemo(() => {
     const datasource = new DataSource({
       key: "id",
@@ -47,12 +46,10 @@ const VendorListPage = (props) => {
           .then((snap) =>
             snap.forEach((doc) => result.push({ ...doc.data(), id: doc.id }))
           );
-          setVendors(result)
+        setVendors(result);
         return result;
       },
       remove: async (key) => {
-
-        
         await db.deleteOneVendor(key).then(datasource.load());
       },
       insert: async (values) => {
@@ -62,9 +59,9 @@ const VendorListPage = (props) => {
           .then((snap) =>
             snap.forEach((doc) => result.push({ ...doc.data(), id: doc.id }))
           );
-        
+
         const data = { ...values, ...name };
-        await db.addNewVendor(data, user)
+        await db.addNewVendor(data, user);
 
         setIsEditing(false);
         setFormOpen(false);
@@ -79,7 +76,7 @@ const VendorListPage = (props) => {
     });
     return datasource;
   }, []);
-  
+
   useEffect(() => {
     return () => {
       datasource.dispose();
@@ -87,23 +84,37 @@ const VendorListPage = (props) => {
   }, []);
 
   const handleChangeName = (e) => {
-    setName({name: e.value})
-  }
+    setName({ name: e.value });
+  };
 
   const onRowInserted = (e) => {
-      const result = [];
-      const dup = vendors.find(vendor => vendor.name === name.name) 
+    const result = [];
+    const dup = vendors.find((vendor) => vendor.name === name.name);
 
-      if (dup) {
-        notify({message: "Duplicate Vendor!", position: {at: "top", offset:"0 230"}}, "error", 500)
-        e.cancel = Promise.resolve(true)
-      } else if (name.name === '' || typeof name.name !== 'string') {
-         notify({message: "Please enter vendor!", position: {at: "top", offset:"0 230"}}, "error", 500)
-        e.cancel = Promise.resolve(true)
-      } else {
-        e.data = {...e.data, ...name}
-      }  
-  }
+    if (dup) {
+      notify(
+        {
+          message: "Duplicate Vendor!",
+          position: { at: "top", offset: "0 230" },
+        },
+        "error",
+        500
+      );
+      e.cancel = Promise.resolve(true);
+    } else if (name.name === "" || typeof name.name !== "string") {
+      notify(
+        {
+          message: "Please enter vendor!",
+          position: { at: "top", offset: "0 230" },
+        },
+        "error",
+        500
+      );
+      e.cancel = Promise.resolve(true);
+    } else {
+      e.data = { ...e.data, ...name };
+    }
+  };
 
   return (
     <React.Fragment>
@@ -132,7 +143,7 @@ const VendorListPage = (props) => {
         <Editing
           mode="popup"
           allowAdding={true}
-          allowDeleting={user.isAdmin}
+          // allowDeleting={user.isAdmin}
           allowUpdating={true}
         >
           <Popup
@@ -152,20 +163,29 @@ const VendorListPage = (props) => {
           </Popup>
           <Form>
             <Item itemType="group" colCount={1} colSpan={2}>
-              {!isEditing ? <Item dataField="name" >
-                <Autocomplete
-                  dataSource={datasource.store()}
-                  valueExpr={"name"}
-                  placeholder="Enter Vendor Name..."
-                  onValueChanged={handleChangeName}
-                ><RequiredRule/></Autocomplete></Item> : <Item dataField="name" ><RequiredRule/></Item>}
+              {!isEditing ? (
+                <Item dataField="name">
+                  <Autocomplete
+                    dataSource={datasource.store()}
+                    valueExpr={"name"}
+                    placeholder="Enter Vendor Name..."
+                    onValueChanged={handleChangeName}
+                  >
+                    <RequiredRule />
+                  </Autocomplete>
+                </Item>
+              ) : (
+                <Item dataField="name">
+                  <RequiredRule />
+                </Item>
+              )}
               <Item dataField="notes" />
             </Item>
           </Form>
         </Editing>
         <Column type="buttons" width={110}>
           <Button name="edit" />
-          <Button name="delete" visible={user.isAdmin} />
+          {/* <Button name="delete" visible={user.isAdmin} /> */}
         </Column>
         <Column
           dataField="name"
