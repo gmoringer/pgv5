@@ -141,9 +141,9 @@ const PoListPage = (props) => {
       },
     });
 
-    if (!user.isAdmin) {
-      newStore.filter("active", "=", true);
-    }
+    // if (!user.isAdmin) {
+    //   newStore.filter("active", "=", true);
+    // }
     return newStore;
   }, []);
 
