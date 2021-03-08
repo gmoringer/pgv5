@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../contexts/auth";
 import DataSource from "devextreme/data/data_source";
-import { Item } from "devextreme-react/form";
+import { Item, SimpleItem, TextBoxButton , TextBox} from "devextreme-react/form";
 import Firebase from "firebase";
 import DataGrid, {
   Column,
@@ -124,13 +124,11 @@ const PoListPage = (props) => {
         await db.getAllPos().then((snaps) =>
           snaps.forEach((snap) => {
             const data = snap.data();
-
             const currentJob = jobList.find((job) => {
               return job.uid === data.jobnr;
             });
 
             var amDel;
-
             try {
               amDel = currentJob.amdel;
             } catch {
@@ -222,9 +220,9 @@ const PoListPage = (props) => {
               <Item dataField="date" />
               <Item dataField="desc" />
               <Item dataField="amount" />
-              <Item dataField="paidby" />
               <Item dataField="vendor" />
               <Item dataField="type" />
+              <SimpleItem dataField="paidby" editorType='dxTextBox' />
             </Item>
           </Form>
         </Editing>
@@ -233,7 +231,6 @@ const PoListPage = (props) => {
             name="edit"
             visible={(e) => {
               const data = e.row.data;
-              // console.log(data)
               return data.isPropManager;
             }}
           />
@@ -241,7 +238,6 @@ const PoListPage = (props) => {
             name="delete"
             visible={(e) => {
               const data = e.row.data;
-              // console.log(data)
               return data.isPropManager;
             }}
           />
