@@ -238,7 +238,7 @@ const JobListPage = (props) => {
           dataField={"dateapproved"}
           caption={"Date Approved"}
           dataType="date"
-          allowSorting={false}
+          allowSorting={true}
           calculateCellValue={(res) => {
             return res.dateapproved instanceof Firebase.firestore.Timestamp
               ? res.dateapproved.toDate()
