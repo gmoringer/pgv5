@@ -18,7 +18,7 @@ export default () => (
         </div>
         <p style={{ textAlign: "center", alignSelf: "stretch" }}>
           Thanks for using the Pacific Gardens & Company Business Portal.
-          <div>v1.0</div>
+          Current Version is v1.0
         </p>
       </div>
     </div>

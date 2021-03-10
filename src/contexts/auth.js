@@ -17,7 +17,15 @@ function AuthProvider(props) {
       if (usr) {
         db.getOneUser(usr.uid).then((user) => {
           const isAdmin = user.data().isAdmin ? true : false;
-          const newUser = { ...user.data(), isAdmin: isAdmin, uid: usr.uid };
+          const editVendorlist = user.data().vendorlist
+            ? user.data().vendorlist
+            : false;
+          const newUser = {
+            ...user.data(),
+            isAdmin: isAdmin,
+            uid: usr.uid,
+            vendorlist: editVendorlist,
+          };
           setUser(newUser);
         });
       }

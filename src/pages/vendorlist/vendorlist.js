@@ -47,6 +47,7 @@ const VendorListPage = (props) => {
             snap.forEach((doc) => result.push({ ...doc.data(), id: doc.id }))
           );
         setVendors(result);
+        console.log(user);
         return result;
       },
       remove: async (key) => {
@@ -137,14 +138,14 @@ const VendorListPage = (props) => {
           setIsEditing(false);
         }}
       >
-        <Paging defaultPageSize={10} />
+        <Paging defaultPageSize={100} />
         <Pager showPageSizeSelector={true} showInfo={true} />
         <FilterRow visible={true} />
         <Editing
           mode="popup"
-          allowAdding={true}
+          allowAdding={user.vendorlist || user.isAdmin}
           // allowDeleting={user.isAdmin}
-          allowUpdating={true}
+          allowUpdating={user.vendorlist || user.isAdmin}
         >
           <Popup
             title="New Vendor Entry"
@@ -183,6 +184,7 @@ const VendorListPage = (props) => {
             </Item>
           </Form>
         </Editing>
+
         <Column type="buttons" width={110}>
           <Button name="edit" />
           {/* <Button name="delete" visible={user.isAdmin} /> */}
