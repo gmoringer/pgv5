@@ -184,7 +184,6 @@ const VendorListPage = (props) => {
             </Item>
           </Form>
         </Editing>
-
         <Column type="buttons" width={110}>
           <Button name="edit" />
           {/* <Button name="delete" visible={user.isAdmin} /> */}
