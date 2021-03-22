@@ -11,7 +11,6 @@ import { firebase, auth, db } from "../firebase";
 function AuthProvider(props) {
   const [user, setUser] = useState();
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     firebase.auth.onAuthStateChanged((usr) => {
       if (usr) {
@@ -20,9 +19,14 @@ function AuthProvider(props) {
           const editVendorlist = user.data().vendorlist
             ? user.data().vendorlist
             : false;
+
+          const editWorkers = user.data().isWorkers
+            ? user.data().isWorkers
+            : false;
           const newUser = {
             ...user.data(),
             isAdmin: isAdmin,
+            okWorkers: editWorkers,
             uid: usr.uid,
             vendorlist: editVendorlist,
           };

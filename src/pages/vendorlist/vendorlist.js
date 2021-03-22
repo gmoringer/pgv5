@@ -47,7 +47,6 @@ const VendorListPage = (props) => {
             snap.forEach((doc) => result.push({ ...doc.data(), id: doc.id }))
           );
         setVendors(result);
-        console.log(user);
         return result;
       },
       remove: async (key) => {

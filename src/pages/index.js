@@ -9,3 +9,4 @@ export { default as CreateNewAccount } from "./CreateNewAccount/CreateNewAccount
 export { default as AllUsers } from "./allusers/AllUsers";
 export { default as LastWorked } from "./LastWorked/LastWorked";
 export { default as VendorListPage } from "./vendorlist/vendorlist";
+export { default as Workers } from "./workers/workers";

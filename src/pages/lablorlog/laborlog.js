@@ -21,7 +21,7 @@ import DataGrid, {
 
 import { db } from "../../firebase";
 
-const PoListPage = (props) => {
+const LaborLogPage = (props) => {
   const [managers, setManagers] = useState([]);
   const [jobs, setJobs] = useState([]);
 
@@ -306,4 +306,4 @@ const PoListPage = (props) => {
   );
 };
 
-export default PoListPage;
+export default LaborLogPage;

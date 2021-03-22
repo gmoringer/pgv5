@@ -18,8 +18,10 @@ export default () => (
         </div>
         <p style={{ textAlign: "center", alignSelf: "stretch" }}>
           Thanks for using the Pacific Gardens & Company Business Portal.
-          Current Version is v1.01
         </p>
+        <div style={{ textTransform: "uppercase", textAlign: "center" }}>
+          Current Version is v1.02
+        </div>
       </div>
     </div>
   </React.Fragment>

@@ -30,6 +30,10 @@ export const navigation = [
         text: "Vendor List",
         path: "/vendorlist",
       },
+      {
+        text: "Workers",
+        path: "/workers",
+      },
     ],
   },
 ];

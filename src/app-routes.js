@@ -10,6 +10,7 @@ import {
   AllUsers,
   LastWorked,
   VendorListPage,
+  Workers,
 } from "./pages";
 
 const routes = [
@@ -40,6 +41,10 @@ const routes = [
   {
     path: "/vendorlist",
     component: VendorListPage,
+  },
+  {
+    path: "/workers",
+    component: Workers,
   },
   { path: "/createuser", component: CreateNewAccount },
   { path: "/allusers", component: AllUsers },

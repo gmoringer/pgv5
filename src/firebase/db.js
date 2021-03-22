@@ -8,13 +8,26 @@ import { useAuth } from "../api/auth.js";
 //Misc API
 export const getAllVendors = () => db.collection("vendors").get();
 
+export const getAllWorkers = () => db.collection("workers").get();
+
+export const addNewWorker = (worker, user) => {
+  return db.collection("workers").add({
+    ...worker,
+  });
+};
+
+export const updateOneWorker = (key, value) =>
+  db
+    .collection("workers")
+    .doc(key)
+    .update({ ...value });
+
 export const deleteOneVendor = (key) =>
   db.collection("vendors").doc(key).delete();
 
 // Property API
 
 export const getAllProperties = () => db.collection("properties").get();
-
 export const getAllJobTypes = () => db.collection("jobtypes").get();
 
 export const deleteOneProperty = (key) => {
