@@ -71,6 +71,7 @@ const Workers = (props) => {
     setName({ name: e.value });
   };
 
+  console.log(user)
   return (
     <React.Fragment>
       <h2 className={"content-block"}>Workers</h2>
@@ -90,8 +91,8 @@ const Workers = (props) => {
         <FilterRow visible={true} />
         <Editing
           mode="popup"
-          allowAdding={user.okWorkers || user.isAdmin}
-          allowUpdating={user.okWorkers || user.isAdmin}
+          allowAdding={user.isWorkers || user.isAdmin}
+          allowUpdating={user.isWorkers || user.isAdmin}
         >
           <Popup
             title="Workers Entry"

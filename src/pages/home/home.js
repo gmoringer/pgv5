@@ -20,7 +20,7 @@ export default () => (
           Thanks for using the Pacific Gardens & Company Business Portal.
         </p>
         <div style={{ textTransform: "uppercase", textAlign: "center" }}>
-          Current Version is v1.02
+          Current Version is v1.03
         </div>
       </div>
     </div>
