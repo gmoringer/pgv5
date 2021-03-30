@@ -11,6 +11,7 @@ import { firebase, auth, db } from "../firebase";
 function AuthProvider(props) {
   const [user, setUser] = useState();
   const [loading, setLoading] = useState(true);
+  
   useEffect(() => {
     firebase.auth.onAuthStateChanged((usr) => {
       if (usr) {

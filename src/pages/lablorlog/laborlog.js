@@ -24,6 +24,7 @@ import { db } from "../../firebase";
 const LaborLogPage = (props) => {
   const [managers, setManagers] = useState([]);
   const [jobs, setJobs] = useState([]);
+  const [workers, setWorkers] = useState();
 
   const [properties, setProperties] = useState([]);
 
@@ -122,6 +123,14 @@ const LaborLogPage = (props) => {
             });
           });
         });
+        await db.getAllWorkers().then((snaps) => {
+          const result = [];
+          snaps.forEach((snap) => {
+            const data = snap.data();
+            result.push({ ...data, uid: snap.id });
+          });
+          setWorkers(result);
+        });
         return result;
       },
       remove: async (key) => {
@@ -152,7 +161,6 @@ const LaborLogPage = (props) => {
       store.dispose();
     };
   }, []);
-
   return (
     <React.Fragment>
       <h2 className={"content-block"}>Labor Log</h2>
