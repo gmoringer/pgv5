@@ -19,6 +19,8 @@ import DataGrid, {
   Export,
 } from "devextreme-react/data-grid";
 
+import { SimpleItem, GroupItem } from "devextreme-react/form";
+
 import { db } from "../../firebase";
 
 const LaborLogPage = (props) => {
@@ -195,7 +197,7 @@ const LaborLogPage = (props) => {
             title="New Labor Log Entry"
             showTitle={true}
             width={700}
-            height={350}
+            height={450}
             onShowing={(e) => {
               return setFormOpen(true);
             }}
@@ -207,14 +209,21 @@ const LaborLogPage = (props) => {
             <Position my="top" at="top" of={window} />
           </Popup>
           <Form>
-            <Item itemType="group" colCount={2} colSpan={2}>
-              <Item dataField="jobnr" />
+            <GroupItem caption="Worker Information">
               <Item dataField="dateworked" />
-              <Item dataField="hours" />
-              <Item dataField="wage" />
+              <Item dataField="jobnr" />
               <Item dataField="name" />
               <Item dataField="notes" />
-            </Item>
+            </GroupItem>
+
+            <SimpleItem itemType="group">
+              <GroupItem caption="Time Logging">
+                <Item dataField="hours" />
+              </GroupItem>
+              <GroupItem caption="Over Time">
+                <Item dataField="overtime" />
+              </GroupItem>
+            </SimpleItem>
           </Form>
         </Editing>
         <Column type="buttons" width={110}>
@@ -285,6 +294,15 @@ const LaborLogPage = (props) => {
         <Column
           dataField={"hours"}
           caption={"Hours"}
+          allowSorting={false}
+          dataType="number"
+        >
+          <RequiredRule />
+          <Format precision={2}></Format>
+        </Column>
+        <Column
+          dataField={"overtime"}
+          caption={"Overtime"}
           allowSorting={false}
           dataType="number"
         >
