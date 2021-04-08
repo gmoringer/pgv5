@@ -18,6 +18,7 @@ import DataGrid, {
   Format,
   Export,
 } from "devextreme-react/data-grid";
+import SelectBox from "devextreme-react/select-box";
 
 import { SimpleItem, GroupItem } from "devextreme-react/form";
 
@@ -97,19 +98,28 @@ const LaborLogPage = (props) => {
       load: async () => {
         const result = [];
         const jobList = [];
+        const workers = [];
         await db
           .getAllJobs()
           .then((snaps) =>
             snaps.forEach((doc) => jobList.push({ ...doc.data(), uid: doc.id }))
           );
 
+        await db.getAllWorkers().then((snaps) => {
+          snaps.forEach((doc) => workers.push({ ...doc.data(), uid: doc.id }));
+        });
+        setWorkers(workers);
+
         await db.getAllLaborLogs().then((snaps) => {
           snaps.forEach((snap) => {
             const data = snap.data();
-
             const currentJob = jobList.find((job) => {
               return job.uid === data.jobnr;
             });
+
+            if (data.hasOwnProperty("workerid")) {
+            } else {
+            }
 
             var amDel;
 
@@ -152,9 +162,6 @@ const LaborLogPage = (props) => {
       },
     });
 
-    // if (!user.isAdmin) {
-    //   newStore.filter("active", "=", true);
-    // }
     return newStore;
   }, []);
 
@@ -176,11 +183,17 @@ const LaborLogPage = (props) => {
         columnHidingEnabled={true}
         allowColumnResizing={true}
         rowAlternationEnabled={true}
-        onEditingStart={() => {
+        onEditingStart={(e) => {
+          console.log(e.data.name);
+          console.log(workers);
           setIsEditing(true);
         }}
         onDisposing={() => {
           setIsEditing(false);
+        }}
+        onInitNewRow={(e) => {
+          e.data.overtime = 0;
+          e.data.hours = 0;
         }}
       >
         <Export enabled={true} />
@@ -215,7 +228,6 @@ const LaborLogPage = (props) => {
               <Item dataField="name" />
               <Item dataField="notes" />
             </GroupItem>
-
             <SimpleItem itemType="group">
               <GroupItem caption="Time Logging">
                 <Item dataField="hours" />
@@ -290,6 +302,7 @@ const LaborLogPage = (props) => {
         </Column>
         <Column dataField={"name"} caption={"Name"} allowSorting={true}>
           <RequiredRule />
+          <Lookup dataSource={workers} valueExpr={"uid"} displayExpr="name" />
         </Column>
         <Column
           dataField={"hours"}
