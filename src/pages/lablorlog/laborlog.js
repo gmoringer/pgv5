@@ -18,7 +18,6 @@ import DataGrid, {
   Format,
   Export,
 } from "devextreme-react/data-grid";
-import SelectBox from "devextreme-react/select-box";
 
 import { SimpleItem, GroupItem } from "devextreme-react/form";
 
@@ -28,18 +27,31 @@ const LaborLogPage = (props) => {
   const [managers, setManagers] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [workers, setWorkers] = useState();
-
   const [properties, setProperties] = useState([]);
-
   const [formOpen, setFormOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-
   const { user, signOut } = useAuth();
+
+  const overTimeMulti = process.env.REACT_APP_OVERTIME_MULTI;
+  const laborCostMulti = process.env.REACT_APP_LABOR_COST_MULTI;
 
   useEffect(() => {
     if (!user) {
       signOut();
     }
+  }, []);
+
+  useEffect(() => {
+    const workers = [];
+
+    async function getData() {
+      db.getAllWorkers().then((snaps) => {
+        snaps.forEach((doc) => workers.push({ ...doc.data(), uid: doc.id }));
+      });
+    }
+    getData().then(() => console.log(workers));
+    setWorkers(workers);
+    console.log(workers);
   }, []);
 
   useEffect(() => {
@@ -98,7 +110,7 @@ const LaborLogPage = (props) => {
       load: async () => {
         const result = [];
         const jobList = [];
-        const workers = [];
+        const getWorkers = [];
         await db
           .getAllJobs()
           .then((snaps) =>
@@ -106,9 +118,11 @@ const LaborLogPage = (props) => {
           );
 
         await db.getAllWorkers().then((snaps) => {
-          snaps.forEach((doc) => workers.push({ ...doc.data(), uid: doc.id }));
+          snaps.forEach((doc) =>
+            getWorkers.push({ ...doc.data(), uid: doc.id })
+          );
         });
-        setWorkers(workers);
+        setWorkers(getWorkers);
 
         await db.getAllLaborLogs().then((snaps) => {
           snaps.forEach((snap) => {
@@ -117,9 +131,9 @@ const LaborLogPage = (props) => {
               return job.uid === data.jobnr;
             });
 
-            if (data.hasOwnProperty("workerid")) {
-            } else {
-            }
+            const currentWorker = getWorkers.find(
+              (worker) => worker.uid === data.name
+            );
 
             var amDel;
 
@@ -135,6 +149,7 @@ const LaborLogPage = (props) => {
             });
           });
         });
+
         await db.getAllWorkers().then((snaps) => {
           const result = [];
           snaps.forEach((snap) => {
@@ -149,7 +164,16 @@ const LaborLogPage = (props) => {
         await db.deleteOneLaborLog(key).then(() => store.load());
       },
       insert: async (values) => {
-        await db.addNewLaborLog(values, user);
+        var currentWorker = [];
+        await db.getAllWorkers().then((snap) => {
+          snap.forEach((worker) => {
+            if (worker.id === values.name) {
+              currentWorker = worker.data();
+            }
+          });
+        });
+        console.log(currentWorker);
+        await db.addNewLaborLog(values, user, currentWorker.rate);
         setIsEditing(false);
         setFormOpen(false);
         store.load();
@@ -184,8 +208,6 @@ const LaborLogPage = (props) => {
         allowColumnResizing={true}
         rowAlternationEnabled={true}
         onEditingStart={(e) => {
-          console.log(e.data.name);
-          console.log(workers);
           setIsEditing(true);
         }}
         onDisposing={() => {
@@ -231,6 +253,7 @@ const LaborLogPage = (props) => {
             <SimpleItem itemType="group">
               <GroupItem caption="Time Logging">
                 <Item dataField="hours" />
+                <Item dataField="rate" />
               </GroupItem>
               <GroupItem caption="Over Time">
                 <Item dataField="overtime" />
@@ -323,10 +346,14 @@ const LaborLogPage = (props) => {
           <Format precision={2}></Format>
         </Column>
         <Column
-          dataField={"wage"}
-          caption={"Wage"}
+          dataField={"rate"}
+          caption={"Base Wage"}
           allowSorting={false}
+          allowEditing={false}
           dataType="number"
+          // calculateCellValue={(e) => {
+          //   return console.log(e.rate);
+          // }}
         >
           <RequiredRule />
           <Format type="currency" precision={2}></Format>
@@ -335,7 +362,11 @@ const LaborLogPage = (props) => {
           dataField={"cost"}
           caption={"Cost"}
           allowSorting={false}
-          calculateCellValue={(res) => res.hours * res.wage * 1.25}
+          calculateCellValue={(res) => {
+            return (
+              (res.hours * res.rate + res.overtime * res.rate * 1.5) * 1.25
+            );
+          }}
         >
           <Format type="currency" precision={2}></Format>
         </Column>

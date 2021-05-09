@@ -233,9 +233,10 @@ export const deleteOneLaborLog = async (key) => {
 //API LABOR
 export const getAllLaborLogs = () => db.collection("labor").get();
 
-export const addNewLaborLog = (ll, user) => {
+export const addNewLaborLog = (ll, user, currentRate) => {
+  console.log(currentRate);
   db.collection("labor")
-    .add({ ...ll, am: user.uid })
+    .add({ ...ll, am: user.uid, rate: currentRate })
     .then((res) => {
       const sum = +(ll.wage * ll.hours * 1.25).toFixed(2);
       const increment = firebase.firestore.FieldValue.increment(
@@ -244,12 +245,6 @@ export const addNewLaborLog = (ll, user) => {
       db.collection("jobs").doc(ll.jobnr).update({ laborsum: increment });
     });
 };
-
-// export const updateLaborPrice = (value, job) => {
-//   const amount = parseInt(value);
-//   const increment = firebase.firestore.FieldValue.increment(amount);
-//   db.collection("jobs").doc(job).update({ laborsum: increment });
-// };
 
 export const doCreateUser = (id, initials, fullname, email, isAdmin) => {
   return db.collection("users").doc(id).set({
