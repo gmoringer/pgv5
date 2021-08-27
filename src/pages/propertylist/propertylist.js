@@ -19,6 +19,8 @@ import { states } from "../../constants";
 import { useAuth } from "../../contexts/auth";
 import { db } from "../../firebase";
 
+// TEST FEATURE
+
 const PropertyListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const { user, signOut } = useAuth();
