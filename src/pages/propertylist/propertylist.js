@@ -88,16 +88,6 @@ const PropertyListPage = (props) => {
         columnAutoWidth={true}
         allowColumnResizing={true}
         rowAlternationEnabled={true}
-        // onRowPrepared={(e) => {
-        //   if (e.rowType == "data" && e.data.active == false) {
-        //     e.rowElement.style.backgroundColor = "Tomato";
-        //     e.rowElement.style.opacity = 0.75;
-        //     e.rowElement.className = e.rowElement.className.replace(
-        //       "dx-row-alt",
-        //       ""
-        //     );
-        //   }
-        // }}
       >
         <Export enabled={true} />
         <Paging defaultPageSize={50} />
