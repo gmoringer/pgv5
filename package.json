@@ -8,6 +8,8 @@
     "@testing-library/user-event": "^7.2.1",
     "devextreme": "^20.1.9",
     "devextreme-react": "^20.1.9",
+    "exceljs": "^4.3.0",
+    "file-saver": "^2.0.5",
     "firebase": "^7.24.0",
     "node-sass": "^4.11.0",
     "react": "^17.0.1",

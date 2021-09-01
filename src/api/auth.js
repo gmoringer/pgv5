@@ -23,14 +23,15 @@ export async function signIn(email, password) {
 }
 
 export async function createAccount(value) {
-  const { email, password, initials, fullname, isAdmin } = value;
+  const { email, password, initials, fullname, isAdmin, isExport } = value;
+  console.log(value);
   let result = {};
 
   await auth
     .doCreateUserWithEmailAndPassword(email, password)
     .then(async (res) => {
       const { uid } = res.user;
-      await doCreateUser(uid, initials, fullname, email, isAdmin);
+      await doCreateUser(uid, initials, fullname, email, isAdmin, isExport);
       result = { isOk: true };
     })
     .catch((err) => {

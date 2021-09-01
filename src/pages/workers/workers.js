@@ -70,8 +70,7 @@ const Workers = (props) => {
   const handleChangeName = (e) => {
     setName({ name: e.value });
   };
-
-  console.log(user)
+  
   return (
     <React.Fragment>
       <h2 className={"content-block"}>Workers</h2>

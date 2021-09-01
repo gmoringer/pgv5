@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../contexts/auth";
 import DataSource from "devextreme/data/data_source";
-import { Item, SimpleItem, TextBoxButton , TextBox} from "devextreme-react/form";
+import {
+  Item,
+  SimpleItem,
+  TextBoxButton,
+  TextBox,
+} from "devextreme-react/form";
 import Firebase from "firebase";
 import DataGrid, {
   Column,
@@ -189,7 +194,7 @@ const PoListPage = (props) => {
           setIsEditing(false);
         }}
       >
-        <Export enabled={true} />
+        <Export enabled={user.isExport} />
         <Paging enabled={false} />
         <Pager showPageSizeSelector={true} showInfo={true} />
         <FilterRow visible={true} />
@@ -222,7 +227,7 @@ const PoListPage = (props) => {
               <Item dataField="amount" />
               <Item dataField="vendor" />
               <Item dataField="type" />
-              <SimpleItem dataField="paidby" editorType='dxTextBox' />
+              <SimpleItem dataField="paidby" editorType="dxTextBox" />
             </Item>
           </Form>
         </Editing>

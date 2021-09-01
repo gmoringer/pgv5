@@ -118,7 +118,6 @@ export const getLastJob = () =>
 
 export const updateJobPrice = (value, job) => {
   const amount = value;
-  console.log(value);
   const increment = firebase.firestore.FieldValue.increment(amount);
   db.collection("jobs").doc(job).update({ materialssum: increment });
 };
@@ -251,12 +250,20 @@ export const addNewLaborLog = (ll, user) => {
 //   db.collection("jobs").doc(job).update({ laborsum: increment });
 // };
 
-export const doCreateUser = (id, initials, fullname, email, isAdmin) => {
+export const doCreateUser = (
+  id,
+  initials,
+  fullname,
+  email,
+  isAdmin,
+  isExport
+) => {
   return db.collection("users").doc(id).set({
     initials,
     fullname,
     email,
     isAdmin,
+    isExport,
     isActive: true,
   });
 };

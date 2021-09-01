@@ -29,6 +29,7 @@ const PropertyListPage = (props) => {
           uid: doc.id,
           isAdmin: doc.data().isAdmin ? true : false,
           isActive: doc.data().isActive ? true : false,
+          isExport: doc.data().isExport ? true : false,
         })
       );
       setManagers(result);
@@ -96,6 +97,7 @@ const PropertyListPage = (props) => {
               <Item dataField="email" />
               <Item dataField="initials" />
               <Item dataField="isAdmin" />
+              <Item dataField="isExport" />
               <Item dataField="isActive" />
             </Item>
           </Form>
@@ -111,6 +113,7 @@ const PropertyListPage = (props) => {
         <Column dataField="initials" caption="Initials" alignment="center" />
         <Column dataField="isAdmin" caption="Admin?" />
         <Column dataField="isActive" caption="Active?" />
+        <Column dataField="isExport" caption="Export?" />
       </DataGrid>
     </React.Fragment>
   );

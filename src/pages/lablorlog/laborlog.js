@@ -173,7 +173,7 @@ const LaborLogPage = (props) => {
           setIsEditing(false);
         }}
       >
-        <Export enabled={true} />
+        <Export enabled={user.isExport} />
         <Paging defaultPageSize={50} />
         <Pager showPageSizeSelector={true} showInfo={true} />
         <FilterRow visible={true} />

@@ -20,30 +20,39 @@ export default function (props) {
   const [loading, setLoading] = useState(false);
   const formData = useRef({});
 
-  const [isAdmin, setAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isExport, setIsExport] = useState(false);
 
-  const isAdminChanged = (e) => {
+  const isAdmincheckBoxChanged = (e) => {
+    // console.log(e.value);
+    setIsAdmin(e.value);
   };
-  const onSubmit = useCallback(
-    async (e) => {
-      e.preventDefault();
-      setLoading(true);
 
-      const result = await createAccount({
-        ...formData.current,
-        isAdmin: isAdmin,
-        isActive: true,
-      });
-      setLoading(false);
+  const isExportCheckBoxChanged = (e) => {
+    // console.log(e.value);
+    setIsExport(e.value);
+  };
 
-      if (result.isOk) {
-        history.push("/allusers");
-      } else {
-        notify(result.message, "error", 2000);
-      }
-    },
-    [history]
-  );
+  const onSubmit = async (e) => {
+    // console.log(isAdmin);
+    // console.log(isExport);
+    e.preventDefault();
+    setLoading(true);
+
+    const result = await createAccount({
+      ...formData.current,
+      isAdmin: isAdmin,
+      isExport: isExport,
+      isActive: true,
+    });
+    setLoading(false);
+
+    if (result.isOk) {
+      history.push("/allusers");
+    } else {
+      notify(result.message, "error", 2000);
+    }
+  };
 
   const confirmPassword = useCallback(
     ({ value }) => value === formData.current.password,
@@ -101,9 +110,20 @@ export default function (props) {
         <Item>
           <div className="dx-field">
             <div className="dx-field-label">Admin?</div>
-            {/* <div className="dx-field-value"> */}
-            <CheckBox name="isAdmin" defaultValue={false} />
-            {/* </div> */}
+            <CheckBox
+              name="isAdmin"
+              defaultValue={false}
+              onValueChanged={isAdmincheckBoxChanged}
+            />
+          </div>
+          <div className="dx-field">
+            <div className="dx-field-label">Export?</div>
+            <CheckBox
+              name="isExport"
+              defaultValue={false}
+              id="test"
+              onValueChanged={isExportCheckBoxChanged}
+            />
           </div>
         </Item>
         <Item>
@@ -126,11 +146,6 @@ export default function (props) {
             </span>
           </ButtonOptions>
         </ButtonItem>
-        {/* <Item>
-          <div className={"login-link"}>
-            Have an account? <Link to={"/login"}>Sign In</Link>
-          </div>
-        </Item> */}
       </Form>
     </form>
   );
