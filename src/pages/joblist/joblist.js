@@ -182,14 +182,15 @@ const JobListPage = (props) => {
           <Button
             name="edit"
             visible={(e) => {
-              const data = e.row.data;
-              return data.isPropManager;
+              const rowData = e.row.data;
+              return rowData.isPropManager;
             }}
           />
           <Button
             name="delete"
             visible={(e) => {
-              return false;
+              const rowData = e.row.data;
+              return rowData.materialssum == 0 && rowData.laborsum == 0;
             }}
           />
         </Column>
