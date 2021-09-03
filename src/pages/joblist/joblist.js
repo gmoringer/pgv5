@@ -24,7 +24,6 @@ import { db } from "../../firebase";
 const JobListPage = (props) => {
   const [managers, setManagers] = useState([]);
   const [properties, setProperties] = useState([]);
-
   const [formOpen, setFormOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const { user, signOut } = useAuth();
@@ -144,12 +143,7 @@ const JobListPage = (props) => {
         <Paging defaultPageSize={50} />
         <Pager showPageSizeSelector={true} showInfo={true} />
         <FilterRow visible={true} />
-        <Editing
-          mode="popup"
-          allowAdding={true}
-          // allowDeleting={user.isAdmin}
-          allowUpdating={true}
-        >
+        <Editing mode="popup" allowAdding={true} allowUpdating={true}>
           <Popup
             onShowing={(e) => {
               setFormOpen(true);
@@ -190,7 +184,11 @@ const JobListPage = (props) => {
             name="delete"
             visible={(e) => {
               const rowData = e.row.data;
-              return rowData.materialssum == 0 && rowData.laborsum == 0;
+              return (
+                rowData.materialssum == 0 &&
+                rowData.laborsum == 0 &&
+                rowData.isPropManager
+              );
             }}
           />
         </Column>
