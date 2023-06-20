@@ -122,8 +122,12 @@ export const updateJobPrice = (value, job) => {
   db.collection("jobs").doc(job).update({ materialssum: increment });
 };
 
+let eighteenMonthsAgo = new Date();
+eighteenMonthsAgo.setMonth(eighteenMonthsAgo.getMonth() - 12);
+
 //PO API
-export const getAllPos = () => db.collection("pos").get();
+export const getAllPos = () =>
+  db.collection("pos").where("date", ">=", eighteenMonthsAgo).get();
 export const getLastPo = () =>
   db.collection("pos").orderBy("ponr", "desc").limit(1).get();
 
