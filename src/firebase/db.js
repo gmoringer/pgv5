@@ -123,7 +123,7 @@ export const updateJobPrice = (value, job) => {
 };
 
 let eighteenMonthsAgo = new Date();
-eighteenMonthsAgo.setMonth(eighteenMonthsAgo.getMonth() - 13);
+eighteenMonthsAgo.setMonth(eighteenMonthsAgo.getMonth() - 12);
 
 //PO API
 export const getAllPos = () =>
