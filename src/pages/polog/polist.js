@@ -24,6 +24,8 @@ import DataGrid, {
   Format,
 } from "devextreme-react/data-grid";
 
+//log
+
 import { db } from "../../firebase";
 
 const PoListPage = (props) => {
