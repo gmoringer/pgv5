@@ -19,8 +19,12 @@ export const navigation = [
         path: "/joblist",
       },
       {
-        text: "PO Log",
+        text: "PO Log CURRENT",
         path: "/polog",
+      },
+      {
+        text: "PO Log Archive",
+        path: "/pologarchive",
       },
       {
         text: "Labor Log",

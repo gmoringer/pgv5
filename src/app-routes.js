@@ -11,6 +11,7 @@ import {
   LastWorked,
   VendorListPage,
   Workers,
+  PoListPageArchive,
 } from "./pages";
 
 const routes = [

@@ -4,6 +4,7 @@ export { default as TasksPage } from "./tasks/tasks";
 export { default as PropertyListPage } from "./propertylist/propertylist";
 export { default as JobListPage } from "./joblist/joblist";
 export { default as PoListPage } from "./polog/polist";
+export { default as PoListPageArchive } from "./pologArchive/polistArchive";
 export { default as LaborLogListPage } from "./lablorlog/laborlog";
 export { default as CreateNewAccount } from "./CreateNewAccount/CreateNewAccount";
 export { default as AllUsers } from "./allusers/AllUsers";
