@@ -36,6 +36,10 @@ const routes = [
     component: PoListPage,
   },
   {
+    path: "/pologarchive",
+    component: PoListPageArchive,
+  },
+  {
     path: "/laborlog",
     component: LaborLogListPage,
   },

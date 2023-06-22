@@ -128,7 +128,7 @@ const PoListPageArchive = (props) => {
           .then((snaps) =>
             snaps.forEach((doc) => jobList.push({ ...doc.data(), uid: doc.id }))
           );
-        await db.getAllPos().then((snaps) =>
+        await db.getAllOldPos().then((snaps) =>
           snaps.forEach((snap) => {
             const data = snap.data();
             const currentJob = jobList.find((job) => {
